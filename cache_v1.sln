@@ -7,20 +7,42 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "cache_v1", ".", "{598A7117-
 	ProjectSection(WebsiteProperties) = preProject
 		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
 		Debug.AspNetCompiler.VirtualPath = "/localhost_63658"
-		Debug.AspNetCompiler.PhysicalPath = "D:\cache_v1\"
+		Debug.AspNetCompiler.PhysicalPath = "..\cache_v1\"
 		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63658\"
 		Debug.AspNetCompiler.Updateable = "true"
 		Debug.AspNetCompiler.ForceOverwrite = "true"
 		Debug.AspNetCompiler.FixedNames = "false"
 		Debug.AspNetCompiler.Debug = "True"
 		Release.AspNetCompiler.VirtualPath = "/localhost_63658"
-		Release.AspNetCompiler.PhysicalPath = "D:\cache_v1\"
+		Release.AspNetCompiler.PhysicalPath = "..\cache_v1\"
 		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63658\"
 		Release.AspNetCompiler.Updateable = "true"
 		Release.AspNetCompiler.ForceOverwrite = "true"
 		Release.AspNetCompiler.FixedNames = "false"
 		Release.AspNetCompiler.Debug = "False"
 		VWDPort = "63658"
+		SlnRelativePath = "..\cache_v1\"
+	EndProjectSection
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "CacheEngine-NodeJs", "C:\CacheEngine-NodeJs\", "{7259F2C6-FB4A-4174-82CD-DF49F194B9DF}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_59229"
+		Debug.AspNetCompiler.PhysicalPath = "C:\CacheEngine-NodeJs\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_59229\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_59229"
+		Release.AspNetCompiler.PhysicalPath = "C:\CacheEngine-NodeJs\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_59229\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "59229"
+		SlnRelativePath = "C:\CacheEngine-NodeJs\"
 	EndProjectSection
 EndProject
 Global
@@ -30,6 +52,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{598A7117-A5FC-4E0B-9EC8-51E4DA390755}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{598A7117-A5FC-4E0B-9EC8-51E4DA390755}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7259F2C6-FB4A-4174-82CD-DF49F194B9DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7259F2C6-FB4A-4174-82CD-DF49F194B9DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

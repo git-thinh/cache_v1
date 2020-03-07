@@ -10,6 +10,12 @@ npm install cookie-parser grpc redis level grpc @grpc/proto-loader socket.io -S
 npm install kue
 npm install response-time
 
+.\redis-server.exe — service-install --port 19000 redis.windows.conf — loglevel verbose
+.\redis-server.exe --service-install --service-name Redis-Log --port 19000
+
+npm install cron redis
+
+
 
 
 services.msc

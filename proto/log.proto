@@ -1,0 +1,15 @@
+﻿syntax = "proto3"; 
+ 
+package Grpc;
+ 
+service LogSerice {
+    rpc Send(Log) returns (Log){}
+}
+
+message Log {
+  int64 time = 1;
+  string type = 2;
+  string app = 3;
+  string forward = 4;
+  string text = 5;
+}
