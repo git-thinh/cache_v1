@@ -146,8 +146,8 @@ const savelog_dontupheu = function (type, data) {
 
 const _DB_CACHE_123 = {
     user: 'pol',
-    password: 'dev@123',
-    server: '171.244.51.123',
+    password: '',
+    server: '',
     database: 'POL_20191230',
     connectionTimeout: 300000,
     requestTimeout: 300000,
@@ -159,8 +159,8 @@ const _DB_CACHE_123 = {
 
 const _DB_CACHE_POS_AMAZON = {
     user: 'mobile',
-    password: 'uj3ZVY2lFBGE',
-    server: '10.200.10.234',
+    password: '',
+    server: '',
     database: 'Release_FB51_App',
     connectionTimeout: 300000,
     requestTimeout: 300000,
