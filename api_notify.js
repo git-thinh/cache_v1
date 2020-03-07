@@ -26,7 +26,15 @@
             console.log('API_NOTIFY \t-> connect');
         });
     };
-    
+
+    this.delete_all = function (callback) {
+        if (CLIENT == null) return callback({ ok: false, message: 'CacheEngine [' + PORT + '] disconnect' });
+
+        CLIENT.flushall('ASYNC', function (err) {
+            if (callback) callback({ ok: err == null, message: err });
+        });
+    };
+
     this.send = function (receiver, data, callback) {
         if (receiver == null || data == null) return;
         if (CLIENT == null) return;

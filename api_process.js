@@ -42,7 +42,7 @@
             console.log('API_PROCESS \t-> connect');
         });
     };
-    
+
     this.add = function (obj, callback) {
         if (obj == null)
             return callback({ ok: false, message: 'obj or obj.id is null' });
@@ -54,18 +54,48 @@
             CLIENT.set(id, JSON.stringify(obj), function (err, res) {
                 if (callback) callback({ ok: err == null, id: id, message: err });
             });
-        }); 
+        });
     };
 
+
     this.update = function (obj, callback) {
-        if (obj == null && obj.id == null)
+        if (obj == null)
             return callback({ ok: false, message: 'obj or obj.id is null' });
 
-        if (CLIENT == null)
-            return callback({ ok: false, id: obj.id, message: 'CacheEngine [' + PORT + '] disconect' });
+        if (Array.isArray(obj)) {
+            if (obj.length == 0) return callback({ ok: true });
 
-        CLIENT.set(id, JSON.stringify(obj), function (err, res) {
-            if (callback) callback({ ok: err == null, id: obj.id, message: err });
+            if (CLIENT == null || READY == false)
+                return callback({ ok: false, id: obj.id, message: 'CacheEngine [' + PORT + '] disconnect' });
+
+            const cmds = [];
+            for (var i = 0; i < obj.length; i++) {
+                if (obj[i].id == null) continue;
+                cmds.push(['set', obj[i].id, JSON.stringify(obj[i])]);
+            }
+
+            CLIENT.multi(cmds).exec(function (err, replies_) {
+                if (callback) callback({ ok: err == null, replies: replies_, message: err });
+            });
+
+        } else {
+            if (obj.id == null)
+                return callback({ ok: false, message: 'obj or obj.id is null' });
+
+            if (CLIENT == null)
+                return callback({ ok: false, id: obj.id, message: 'CacheEngine [' + PORT + '] disconnect' });
+
+            CLIENT.set(obj.id, JSON.stringify(obj), function (err, res) {
+                if (callback) callback({ ok: err == null, id: obj.id, message: err });
+            });
+        }
+    };
+
+    this.delete_all = function (callback) {
+        if (CLIENT == null) return callback({ ok: false, message: 'CacheEngine [' + PORT + '] disconnect' });
+
+        CLIENT.flushall('ASYNC', function (err) {
+            if (callback) callback({ ok: err == null, message: err });
         });
     };
 };
