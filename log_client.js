@@ -1,4 +1,4 @@
-﻿let log_client = function grpc_client() {
+﻿let log_client = function log_client() {
     let LOG_READY = false;
     let LOG_PORT = 19000;
 

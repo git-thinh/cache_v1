@@ -11,7 +11,11 @@ npm install kue
 npm install response-time
 
 .\redis-server.exe — service-install --port 19000 redis.windows.conf — loglevel verbose
-.\redis-server.exe --service-install --service-name Redis-Log --port 19000
+
+.\redis-server.exe --service-install --service-name redis-notify --port 10000
+.\redis-server.exe --service-install --service-name redis-log --port 19000
+
+
 
 npm install cron redis
 
