@@ -1,5 +1,5 @@
 ﻿
-const log = require('./log_client.js');
+const log = require('./api_log.js');
 log.start();
 
 const READ_LINE = require("readline");

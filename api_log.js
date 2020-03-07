@@ -1,4 +1,4 @@
-﻿let log_client = function log_client() {
+﻿let api_log = function api_log() {
     let LOG_READY = false;
     let LOG_PORT = 19000;
 
@@ -22,19 +22,19 @@
         CLIENT = REDIS.createClient({ port: LOG_PORT });
         CLIENT.on("error", function (error) {
             LOG_READY = false;
-            console.log('LOG_CLIENT:', error);
+            console.log('API_LOG:', error);
         });
         CLIENT.on("end", function (error) {
             LOG_READY = false;
-            console.log('LOG_CLIENT \t-> end');
+            console.log('API_LOG \t-> end');
         });
         CLIENT.on("ready", function (error) {
             LOG_READY = true;
-            console.log('LOG_CLIENT \t-> ready');
+            console.log('API_LOG \t-> ready');
         });
         CLIENT.on("connect", function (error) {
             LOG_READY = true;
-            console.log('LOG_CLIENT \t-> connect');
+            console.log('API_LOG \t-> connect');
         });
 
         new JOB('*/' + TSL + ' * * * * *', _self.save_log).start();
@@ -72,9 +72,9 @@
     };
 };
 
-log_client.instance = null;
-log_client.getInstance = function () {
-    if (this.instance === null) this.instance = new log_client();
+api_log.instance = null;
+api_log.getInstance = function () {
+    if (this.instance === null) this.instance = new api_log();
     return this.instance;
 };
-module.exports = log_client.getInstance();
+module.exports = api_log.getInstance();
