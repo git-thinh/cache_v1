@@ -3,6 +3,10 @@
         ready: false,
         name: 'API_BASE',
         port: 0,
+        cmd_install: '',
+        sql_scope: null,
+        sql_select: null,
+        sql_connect: null,
         error: ''
     };
 
@@ -22,6 +26,56 @@
 
                 resolve(Number(id));
             }, t);
+        });
+    };
+
+    const db___push_cache = (callback) => {
+
+        const _DB_CONNECTION = require('tedious').Connection;
+        const _DB_REQUEST = require('tedious').Request;
+        const _DB_TYPES = require('tedious').TYPES;
+
+        const conn_str = config.sql_connect[config.sql_scope];
+        const sql_text = config.sql_select;
+        const _DB_CONN = new _DB_CONNECTION(conn_str);
+
+        _DB_CONN.on('connect', function (err) {
+            if (err) {
+                console.log(err);
+            } else {
+                console.log('DB Connected ... ');
+            }
+
+            const _results = [];
+            const request = new _DB_REQUEST(sql_text, function (err_, count_, rows_) {
+                _DB_CONN.close();
+                callback({ ok: err_ == null, rows: _results, message: err_ });
+            });
+
+            request.on('row', function (columns) {
+                const o = {};
+                columns.forEach(function (v_) {
+                    const col = v_.metadata.colName;
+                    const val = v_.value;
+                    switch (col) {
+                        case 'id':
+                            if (v_.value != null)
+                                o[col] = Number(val);
+                            else
+                                o[col] = val;
+                            break;
+                        default:
+                            o[col] = val;
+                            break;
+                    }
+                    //console.log('????????? = ' + v_.metadata.colName, v_.metadata.type.name);
+                    //console.log('????????? = ' + v_.metadata.colName, v_.metadata.type.type);
+                });
+                //console.log('????????? = ', o);
+                _results.push(o);
+            });
+
+            _DB_CONN.execSql(request);
         });
     };
 
@@ -47,7 +101,28 @@
         client.on("ready", function (error) {
             config.ready = true;
             console.log('API_' + config.name + ': \t-> ready');
-            if (callback) callback();
+
+            switch (config.cmd_install) {
+                case 'RESET_FROM_DB':
+                    _self.delete_all((del_) => {
+                        if (del_.ok) {
+                            db___push_cache((dbr_) => {
+                                if (dbr_.ok) {
+                                    console.log('DB_ROWS = ', dbr_.rows.length);
+                                    _self.update_multi(dbr_.rows, (crs_) => {
+                                        console.log('PUSH_CACHE = ' + config.port, crs_.ok);
+                                        if (callback) callback();
+                                    });
+                                }
+                            });
+                        } else
+                            if (callback) callback();
+                    });
+                    break;
+                default:
+                    if (callback) callback();
+                    break;
+            }
         });
         client.on("connect", function (error) {
             config.ready = true;
@@ -94,45 +169,28 @@
             if (callback) callback({ ok: err == null && res == 1, id: obj.id, message: err });
         });
     };
+    this.update_multi = function (objs, callback) {
+        if (client == null || config.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
 
+        if (objs == null || Array.isArray(objs) == false)
+            return callback({ ok: false, message: 'The format of obj must be [{ ... },{ ... },...]' });
 
+        if (objs.length == 0) return callback({ ok: true });
 
-
-    this.update1 = function (obj, callback) {
-        if (obj == null)
-            return callback({ ok: false, message: 'obj or obj.id is null' });
-
-        if (Array.isArray(obj)) {
-            if (obj.length == 0) return callback({ ok: true });
-
-            if (client == null || READY == false)
-                return callback({ ok: false, id: obj.id, message: 'CacheEngine [' + PORT + '] disconnect' });
-
-            const cmds = [];
-            for (var i = 0; i < obj.length; i++) {
-                if (obj[i].id == null) continue;
-                cmds.push(['set', obj[i].id, JSON.stringify(obj[i])]);
-            }
-
-            client.multi(cmds).exec(function (err, replies_) {
-                if (callback) callback({ ok: err == null, replies: replies_, message: err });
-            });
-
-        } else {
-            if (obj.id == null)
-                return callback({ ok: false, message: 'obj or obj.id is null' });
-
-            if (client == null)
-                return callback({ ok: false, id: obj.id, message: 'CacheEngine [' + PORT + '] disconnect' });
-
-            client.set(obj.id, JSON.stringify(obj), function (err, res) {
-                if (callback) callback({ ok: err == null, id: obj.id, message: err });
-            });
+        const cmds = [];
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i].id == null) continue;
+            cmds.push(['set', objs[i].id, JSON.stringify(objs[i])]);
         }
-    };
 
+        client.multi(cmds).exec(function (err, replies_) {
+            if (callback) callback({ ok: err == null, replies: replies_, message: err });
+        });
+    };
     this.delete_all = function (callback) {
-        if (client == null) return callback({ ok: false, message: 'CacheEngine [' + PORT + '] disconnect' });
+        if (client == null || config.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
 
         client.flushall('ASYNC', function (err) {
             if (callback) callback({ ok: err == null, message: err });

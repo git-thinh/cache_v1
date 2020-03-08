@@ -6,6 +6,37 @@ load ./txt-full/POL_PROCESS.txt
 load ./txt/POL_PROCESS.txt
 
 
+c:\pol_log_10000\redis-server.exe --service-install --service-name pol_log_10000 --port 10000
+
+c:\pos_user_10001\redis-server.exe --service-install --service-name pos_user_10001 --port 10001
+c:\pos_shop_10002\redis-server.exe --service-install --service-name pos_shop_10002 --port 10002
+c:\pos_group_10003\redis-server.exe --service-install --service-name pos_group_10003 --port 10003
+c:\pol_sys_sms_10004\redis-server.exe --service-install --service-name pol_sys_sms_10004 --port 10004
+c:\pol_sys_email_10005\redis-server.exe --service-install --service-name pol_sys_email_10005 --port 10005
+c:\pol_support_schedule_10006\redis-server.exe --service-install --service-name pol_support_schedule_10006 --port 10006
+c:\pol_step_10007\redis-server.exe --service-install --service-name pol_step_10007 --port 10007
+c:\pol_reason_fail_10008\redis-server.exe --service-install --service-name pol_reason_fail_10008 --port 10008
+c:\pol_process_10009\redis-server.exe --service-install --service-name pol_process_10009 --port 10009
+c:\pol_priority_10010\redis-server.exe --service-install --service-name pol_priority_10010 --port 10010
+c:\pol_pawn_search_10011\redis-server.exe --service-install --service-name pol_pawn_search_10011 --port 10011
+c:\pol_pawn_detail_10012\redis-server.exe --service-install --service-name pol_pawn_detail_10012 --port 10012
+c:\pol_pawn_10013\redis-server.exe --service-install --service-name pol_pawn_10013 --port 10013
+c:\pol_notify_10014\redis-server.exe --service-install --service-name pol_notify_10014 --port 10014
+c:\pol_customer_10015\redis-server.exe --service-install --service-name pol_customer_10015 --port 10015
+c:\pol_channel_10016\redis-server.exe --service-install --service-name pol_channel_10016 --port 10016
+c:\pol_asset_type_10017\redis-server.exe --service-install --service-name pol_asset_type_10017 --port 10017
+c:\pol_area_10018\redis-server.exe --service-install --service-name pol_area_10018 --port 10018
+
+
+
+
+.\redis-server.exe --service-install --service-name pol_log --port 10000
+sc delete pol_log
+
+
+
+
+
 npm install node-fetch cron uuid node-fetch express body-parser lodash -S
 
 
@@ -24,10 +55,6 @@ npm install response-time
 
 .\redis-server.exe — service-install --port 19000 redis.windows.conf — loglevel verbose
 
-.\redis-server.exe --service-install --service-name redis-log --port 19000
-
-.\redis-server.exe --service-install --service-name redis-notify --port 10000
-.\redis-server.exe --service-install --service-name redis-process --port 10001
 
 
 
