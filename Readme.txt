@@ -6,6 +6,9 @@ load ./txt-full/POL_PROCESS.txt
 load ./txt/POL_PROCESS.txt
 
 
+npm install node-fetch cron uuid node-fetch express body-parser lodash -S
+
+
 
 redis-server.exe -k install -n "Redis 16000" --port 16000 --service-install redis.windows.conf --loglevel verbose
 redis-server.exe --port 11000 --service-install redis.windows.conf --loglevel verbose
