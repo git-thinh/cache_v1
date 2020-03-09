@@ -1,5 +1,5 @@
 ﻿
-node --max-old-space-size=4096 api_process_test.js
+node --max-old-space-size=4096 api_test.js
 
 
 load ./txt-full/POL_PROCESS.txt
@@ -28,18 +28,17 @@ c:\pol_asset_type_10017\redis-server.exe --service-install --service-name pol_as
 c:\pol_area_10018\redis-server.exe --service-install --service-name pol_area_10018 --port 10018
 
 
-
-
 .\redis-server.exe --service-install --service-name pol_log --port 10000
 sc delete pol_log
+
+npm install node-fetch cron uuid node-fetch express body-parser csv-stringify lodash tedious redis socket.io performance-now response-time kue -S
+
 
 
 
 
 
 npm install node-fetch cron uuid node-fetch express body-parser lodash -S
-
-
 
 redis-server.exe -k install -n "Redis 16000" --port 16000 --service-install redis.windows.conf --loglevel verbose
 redis-server.exe --port 11000 --service-install redis.windows.conf --loglevel verbose

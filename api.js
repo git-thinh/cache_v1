@@ -13,14 +13,18 @@
     let client;
     const redis = require("redis");
 
-    const guid_id___ = async (k) => {
-        if (k == null) k = 0;
+    let id___ = 100;
+    const guid_id___ = async () => {
         return new Promise((resolve, reject) => {
             const t = Math.floor(Math.random() * 99) + 1;
             setTimeout(function () {
+                id___++;
+                if (id___ > 999) id___ = 100;
+
                 const d = new Date();
                 const id = d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 6) + '' +
-                    d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + (Math.floor(Math.random() * 999) + k + 100).toString().substr(0, 3);
+                    d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + id___;
+                    //(Math.floor(Math.random() * 999) + k + 100).toString().substr(0, 3);
 
                 //console.log(id);
 
@@ -42,12 +46,14 @@
         _DB_CONN.on('connect', function (err) {
             if (err) {
                 console.log(err);
-            } else {
-                console.log('DB Connected ... ');
+                return callback({ ok: false, message: err });
             }
+
+            console.log(config.name + ' start the readinf DB ...');
 
             const _results = [];
             const request = new _DB_REQUEST(sql_text, function (err_, count_, rows_) {
+                console.log(config.name + ' finish the reading DB ...', _results.length);
                 _DB_CONN.close();
                 callback({ ok: err_ == null, rows: _results, message: err_ });
             });
@@ -79,6 +85,50 @@
         });
     };
 
+    const redis___ready = (callback) => {
+        const _self = this;
+
+        switch (config.cmd_install) {
+            case 'RESET_FROM_DB':
+                _self.delete_all((del_) => {
+                    if (del_.ok) {
+                        db___push_cache((dbr_) => {
+                            if (dbr_.ok) {
+                                console.log('DB_ROWS = ', dbr_.rows.length);
+                                _self.update_multi(dbr_.rows, (crs_) => {
+                                    console.log('PUSH_CACHE = ' + config.port, crs_.ok);
+                                    if (callback) callback();
+                                });
+                            }
+                        });
+                    } else
+                        if (callback) callback();
+                });
+                break;
+            case 'FIRST_FROM_DB':
+                _self.get_count(k => {
+                    if (k == 0) {
+                        db___push_cache((dbr_) => {
+                            if (dbr_.ok) {
+                                console.log('DB PUSH CACHE ' + config.name + ' = ', dbr_.rows.length);
+                                _self.update_multi(dbr_.rows, (crs_) => {
+                                    console.log('PUSH_CACHE = ' + config.port, crs_.ok);
+                                    if (callback) callback();
+                                });
+                            }
+                        });
+                    } else {
+                        console.log(config.name + ' CACHED = ' + k);
+                        if (callback) callback();
+                    }
+                });
+                break;
+            default:
+                if (callback) callback();
+                break;
+        }
+    };
+
     this.start = function (config_, callback) {
         const _self = this;
         if (config_) for (var key in config_) config[key] = config_[key];
@@ -100,37 +150,31 @@
         });
         client.on("ready", function (error) {
             config.ready = true;
-            console.log('API_' + config.name + ': \t-> ready');
-
-            switch (config.cmd_install) {
-                case 'RESET_FROM_DB':
-                    _self.delete_all((del_) => {
-                        if (del_.ok) {
-                            db___push_cache((dbr_) => {
-                                if (dbr_.ok) {
-                                    console.log('DB_ROWS = ', dbr_.rows.length);
-                                    _self.update_multi(dbr_.rows, (crs_) => {
-                                        console.log('PUSH_CACHE = ' + config.port, crs_.ok);
-                                        if (callback) callback();
-                                    });
-                                }
-                            });
-                        } else
-                            if (callback) callback();
-                    });
-                    break;
-                default:
-                    if (callback) callback();
-                    break;
-            }
+            //console.log('API_' + config.name + ': \t-> ready');
+            redis___ready(callback);
         });
         client.on("connect", function (error) {
             config.ready = true;
-            console.log('API_' + config.name + ': \t-> connect');
+            //console.log('API_' + config.name + ': \t-> connect');
         });
         return _self;
     };
+
     this.info = () => { return config; };
+    this.get_count = function (callback) {
+        if (client == null || config.ready == false) return callback(0);
+        client.keys('*', function (err, keys) {
+            if (err) return callback(0);
+            callback(keys.length);
+        });
+    };
+    this.get_keys = function (callback) {
+        if (client == null || config.ready == false) return callback([]);
+        client.keys('*', function (err, keys) {
+            if (err) return callback([]);
+            callback(keys);
+        });
+    };
     this.add = function (obj, callback) {
         if (client == null || config.ready == false)
             return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
@@ -195,6 +239,39 @@
         client.flushall('ASYNC', function (err) {
             if (callback) callback({ ok: err == null, message: err });
         });
+    };
+
+    this.indexs = function (callback) {
+        if (callback) callback();
+    };
+
+    this.build_new_object = (callback) => {
+        let v;
+
+        switch (v) {
+            //case -1:
+            //    v = 0;
+            //    break;
+            case 'KEY_IDENTITY':
+                guid_id___((id) => {
+                    return callback(id);
+                });
+                break;
+            case 'null|yyyyMMdd':
+                break;
+            case 'null|hhmmss':
+                break;
+            case 'yyyyMMdd':
+                break;
+            case 'hhmmss':
+                break;
+            case 'yyyyMMddhhmmss':
+                break;
+            default:
+                break;
+        }
+
+        return callback(v);
     };
 };
 
