@@ -174,7 +174,7 @@
         if (obj == null || Array.isArray(obj))
             return callback({ ok: false, message: 'The format of obj must be { ... }' });
 
-        const id = _self.API.___guid_id();
+        const id = _self.API.___guid_id(_self.API, config.id);
 
         let m = obj;
         if (typeof obj == 'string' || typeof obj == 'number') m = { v: obj };
@@ -278,7 +278,7 @@
                             obj[col_] = _self.API[fn]();
                         break;
                     case 'KEY_IDENTITY':
-                        obj['id'] = _self.API.___guid_id(config.id);
+                        obj['id'] = _self.API.___guid_id(_self.API, config.id);
                         break;
                     case 'hhmmss':
                         obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
@@ -329,7 +329,7 @@
 
         //[2.1] Valid type data (not belong case 1.3)
         const col_type_data = _.filter(cols, function (o_) { return err_auto_null.indexOf(o_) == -1; });
-        console.log('COL_TYPE_DATA = ', JSON.stringify(col_type_data));
+        //console.log('COL_TYPE_DATA = ', JSON.stringify(col_type_data));
         const err_type_data = [];
         col_type_data.forEach(col_ => {
             const typ = typeof config.schema[col_];
@@ -346,8 +346,8 @@
 
             const col_addon_miss = _.filter(cf_addon_valid, function (o_) { return cols.indexOf(o_) == -1; });
             //console.log('COLS = ', JSON.stringify(cols));
-            console.log('CF_API_VALID = ', JSON.stringify(cf_addon_valid));
-            console.log('COL_API_MISS = ', JSON.stringify(col_addon_miss));
+            //console.log('CF_API_VALID = ', JSON.stringify(cf_addon_valid));
+            //console.log('COL_API_MISS = ', JSON.stringify(col_addon_miss));
 
             if (col_addon_miss.length > 0)
                 return { ok: false, message: col_addon_miss.join(', ') + ' is missing' };
@@ -367,10 +367,12 @@
                 }
             }
 
-            console.log('CF_API_VALID_RESULT = ', JSON.stringify(cf_addon_valid_result));
+            //console.log('CF_API_VALID_RESULT = ', JSON.stringify(cf_addon_valid_result));
             if (cf_addon_valid_result.length > 0)
                 return { ok: false, message: cf_addon_valid_result.join(', ') };
         }
+
+        if (obj.id == null) return { ok: false, message: 'The field id is null' };
 
         return { ok: true, object: obj };
     };

@@ -1,65 +1,72 @@
 ﻿console.log('\n');
 const FS = require('fs');
 const _ = require('lodash');
-
+const HTTP_PORT = 20000;
 
 //#region [ API ]
 
-let id___ = 100;
-const API = {
-    ___guid_id: function (api_id) {
-        if (api_id == null || api_id == 0) api_id = 99;
-
-        id___++;
-        if (id___ > 999) id___ = 100;
-
-        const d = new Date();
-        const id = api_id + '' +
-            d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 8) + '' +
-            d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + id___;
-
-        return Number(id);
-    }
+let API = {
+    id___: 100,
+    busy: false
 };
 
-if (FS.existsSync('./api/')) {
-    FS.readdir('./api/', (e1_, files_) => {
-        if (e1_) {
-            console.log('API_INSTALL: ', e1_);
-        } else {
-            files_.forEach(file => {
-                const f = file.toLowerCase();
-                if (f.endsWith('.js')) {
-                    const s = FS.readFileSync('./api/' + file, 'utf-8').trim();
-                    if (s.startsWith('function') && s.endsWith('}')) {
-                        let pos = s.indexOf('{');
-                        let js;
-                        if (pos > 0) {
-                            pos++;
-                            js = s.substr(pos, s.length - pos - 1).trim();
-                            try {
-                                let fc;
-                                if (f.startsWith('valid___')) {
-                                    fc = new Function('api', 'col', 'obj', 'val', js);
-                                    fc(API, null, null, null);
-                                } else {
-                                    fc = new Function('api', 'obj', js);
-                                    fc(API, null);
+const api___reset = (callback) => {
+    API.busy = true;
+
+    if (FS.existsSync('./api/')) {
+        FS.readdir('./api/', (e1_, files_) => {
+            if (e1_) {
+                console.log('API_INSTALL: ', e1_);
+                callback();
+            } else {
+                const temp___ = {
+                    id___: 100,
+                    busy: false
+                };
+                files_.forEach(file => {
+                    const f = file.toLowerCase();
+                    if (f.endsWith('.js')) {
+                        const s = FS.readFileSync('./api/' + file, 'utf-8').trim();
+                        if (s.startsWith('function') && s.endsWith('}')) {
+                            let pos = s.indexOf('{');
+                            let js;
+                            if (pos > 0) {
+                                pos++;
+                                js = s.substr(pos, s.length - pos - 1).trim();
+                                try {
+                                    let fc;
+                                    if (f.startsWith('___')) {
+                                        fc = new Function('api', 'obj', js);
+                                        fc(temp___, null);
+                                    } else if (f.startsWith('http___')) {
+                                        fc = new Function('api', 'req', 'res', js);
+                                        fc(temp___, null, null);
+                                    } else if (f.startsWith('valid___')) {
+                                        fc = new Function('api', 'col', 'obj', 'val', js);
+                                        fc(temp___, null, null, null);
+                                    } else {
+                                        fc = new Function('api', 'obj', js);
+                                        fc(temp___, null);
+                                    }
+                                    temp___[f.substr(0, f.length - 3).trim()] = fc;
+                                    console.log('-> API: ', file, ' done');
+                                } catch (efc) {
+                                    console.log('\n API: ', file, efc);
                                 }
-                                API[f.substr(0, f.length - 3).trim()] = fc;
-                                console.log('-> API: ', file, ' done');
-                            } catch (efc) {
-                                console.log('\n API: ', file, efc);
                             }
                         }
                     }
-                }
-            });
-
-            console.log('\n----> API: complete ...\n');
-        }
-    });
+                });
+                API = temp___;
+                console.log('\n----> API: complete ...\n');
+                callback();
+            }
+        });
+    }
+    callback();
 }
+
+api___reset(() => { API.busy = false; });
 
 //#endregion
 
@@ -70,7 +77,7 @@ const CFS_DB = require('./config_db.js').get_config();
 const install_db = (callback) => {
     if (CFS_DB.length == 0) return callback();
     const cf = CFS_DB.shift();
-    API[cf.name] = require('./api.js'); 
+    API[cf.name] = require('./api.js');
     API[cf.name].API = API;
     API[cf.name].start(cf, () => {
         console.log('-> %s = READY ... \n\n', cf.name.toUpperCase());
@@ -85,8 +92,13 @@ install_db(() => {
 
 //#endregion
 
+const http = require('./http.js');
 const main___ready = () => {
-    console.log('\n MAIN READY ...');
+    http.API = API;
+    http.start({ port: HTTP_PORT }, () => {
+
+        console.log('\n----> MAIN READY: ' + HTTP_PORT);
+    });
 };
 
 const READ_LINE = require("readline");
@@ -100,6 +112,10 @@ RL.on("line", function (text) {
             break;
         case 'cls':
             console.clear();
+            break;
+        case 'reload':
+            console.clear();
+            api___reset(() => { API.busy = false; });
             break;
         default:
             console.log('\n', API['PAWN'].valid_add({
