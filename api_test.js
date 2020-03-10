@@ -80,6 +80,14 @@ api___reset(() => {
 
 //#endregion
 
+const main___ready = () => {
+    http.API = API;
+    http.start({ port: HTTP_PORT }, () => {
+
+        console.log('\n----> MAIN READY: ' + HTTP_PORT);
+    });
+};
+
 //#region [ DB CACHE ]
 
 const CFS_DB = require('./config_db.js').get_config();
@@ -87,12 +95,19 @@ const CFS_DB = require('./config_db.js').get_config();
 const install_db = (callback) => {
     if (CFS_DB.length == 0) return callback();
     const cf = CFS_DB.shift();
-    API[cf.name] = require('./api.js');
-    API[cf.name].API = API;
-    API[cf.name].start(cf, () => {
-        console.log('-> %s = READY ... \n\n', cf.name.toUpperCase());
+    console.log(cf.name);
+
+    //API[cf.name] = require('./api.js');
+    //API[cf.name].API = API;
+    //API[cf.name].start(cf, (m_) => {
+    //    if (m_ && m_.ok) {
+    //        console.log('-> API_' + cf.name + ': ready ... \n\n');
+    //    } else {
+    //        console.log('-> API_' + cf.name + ': fail ... \n\n', JSON.stringify(m_), cf);
+    //        API[cf.name] = null;
+    //    }
         install_db(callback);
-    });
+    //});
 };
 
 install_db(() => {
@@ -102,13 +117,6 @@ install_db(() => {
 
 //#endregion
 
-const main___ready = () => {
-    http.API = API;
-    http.start({ port: HTTP_PORT }, () => {
-
-        console.log('\n----> MAIN READY: ' + HTTP_PORT);
-    });
-};
 
 const READ_LINE = require("readline");
 const RL = READ_LINE.createInterface({ input: process.stdin, output: process.stdout });

@@ -439,7 +439,6 @@
                 str_name: { name: 'valid___not_empty', para: null },
                 str_phone: { name: 'valid___is_phone', para: null }
             },
-
             PAWN: {
                 int_days: { name: 'valid___greater_than', para: 30 },
                 lng_money: { name: 'valid___greater_than', para: 500000 },
@@ -452,24 +451,269 @@
         const action = ''; // RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL
 
         return [
-            [10, '', 'pol', 'LOG', 10000, null, null, null],
-            [11, action, 'pos', 'USER', 10001, sql.USER, schema.USER, null],
-            [12, action, 'pos', 'SHOP', 10002, sql.SHOP, schema.SHOP, null],
-            [13, action, 'pos', 'GROUP', 10003, sql.GROUP, schema.GROUP, null],
-            [14, action, 'pol', 'SYS_SMS', 10004, sql.SYS_SMS, schema.SYS_SMS, null],
-            [15, action, 'pol', 'SYS_EMAIL', 10005, sql.SYS_EMAIL, schema.SYS_EMAIL, null],
-            [16, action, 'pol', 'SUPPORT_SCHEDULE', 10006, sql.SUPPORT_SCHEDULE, schema.SUPPORT_SCHEDULE, null],
-            [17, action, 'pol', 'STEP', 10007, sql.STEP, schema.STEP, null],
-            [18, action, 'pol', 'REASON_FAIL', 10008, sql.REASON_FAIL, schema.REASON_FAIL, null],
-            [19, action, 'pol', 'PROCESS', 10009, sql.PROCESS, schema.PROCESS, null],
-            [20, action, 'pol', 'PRIORITY', 10010, sql.PRIORITY, schema.PRIORITY, null],
-            [21, action, 'pol', 'PAWN_DETAIL', 10012, sql.PAWN_DETAIL, schema.PAWN_DETAIL, null],
-            [22, action, 'pol', 'NOTIFY', 10014, sql.NOTIFY, schema.NOTIFY, null],
-            [23, action, 'pol', 'CUSTOMER', 10015, sql.CUSTOMER, schema.CUSTOMER, valid_add.CUSTOMER, null],
-            [24, action, 'pol', 'CHANNEL', 10016, sql.CHANNEL, schema.CHANNEL, null],
-            [25, action, 'pol', 'ASSET_TYPE', 10017, sql.ASSET_TYPE, schema.ASSET_TYPE, null],
+            {
+                id: 10,
+                name: 'LOG',
+                port: 10000,
+                schema: null,
+                cmd_install: '',
+                sql_scope: null,
+                sql_select: null,
+                sql_connect: null,
+                valid_add: null
+            },
+            {
+                id: 11,
+                scope: 'pos',
+                name: 'USER',
+                port: 10001,
+                schema: schema.USER,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.USER,
+                sql_connect: sql_connect.pos,
+            },
+            {
+                id: 12,
+                scope: 'pos',
+                name: 'SHOP',
+                port: 10002,
+                schema: schema.SHOP,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.SHOP,
+                sql_connect: null
+            },
+            {
+                id: 13,
+                scope: 'pos',
+                name: 'GROUP',
+                port: 10003,
+                schema: schema.GROUP,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.GROUP,
+                sql_connect: null
+            },
+            {
+                id: 14,
+                scope: 'pol',
+                name: 'SYS_SMS',
+                port: 10004,
+                schema: schema.SYS_SMS,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.SYS_SMS,
+                sql_connect: null
+            },
+            {
+                id: 15,
+                scope: 'pol',
+                name: 'SYS_EMAIL',
+                port: 10005,
+                schema: schema.SYS_EMAIL,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.SYS_EMAIL,
+                sql_connect: null
+            },
+            {
+                id: 16,
+                scope: 'pol',
+                name: 'SUPPORT_SCHEDULE',
+                port: 10006,
+                schema: schema.SUPPORT_SCHEDULE,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.SUPPORT_SCHEDULE,
+                sql_connect: null
+            },
+            {
+                id: 17,
+                scope: 'pol',
+                name: 'STEP',
+                port: 10007,
+                schema: schema.STEP,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.STEP,
+                sql_connect: null
+            },
+            {
+                id: 18,
+                scope: 'pol',
+                name: 'REASON_FAIL',
+                port: 10008,
+                schema: schema.REASON_FAIL,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: sql.REASON_FAIL,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+            {
+                id: null,
+                scope: 'pol',
+                name: null,
+                port: null,
+                schema: null,
+                valid_add: null,
+                cmd_install: action,
+                sql_select: null,
+                sql_connect: null
+            },
+
+            [19, action, 'pol', 'PROCESS', 10009, sql.PROCESS, schema.PROCESS],
+            [20, action, 'pol', 'PRIORITY', 10010, sql.PRIORITY, schema.PRIORITY],
+            [21, action, 'pol', 'PAWN_DETAIL', 10012, sql.PAWN_DETAIL, schema.PAWN_DETAIL],
+            [22, action, 'pol', 'NOTIFY', 10014, sql.NOTIFY, schema.NOTIFY],
+            [23, action, 'pol', 'CUSTOMER', 10015, sql.CUSTOMER, schema.CUSTOMER, valid_add.CUSTOMER],
+            [24, action, 'pol', 'CHANNEL', 10016, sql.CHANNEL, schema.CHANNEL],
+            [25, action, 'pol', 'ASSET_TYPE', 10017, sql.ASSET_TYPE, schema.ASSET_TYPE],
             [26, action, 'pol', 'AREA', 10018, sql.AREA, schema.AREA, null],
-            [27, action, 'pol', 'PAWN', 10013, sql.PAWN, schema.PAWN, valid_add.PAWN, null]
+            [27, action, 'pol', 'PAWN', 10013, sql.PAWN, schema.PAWN, valid_add.PAWN]
         ];
     };
 
@@ -478,7 +722,7 @@
         const cfs = cacheSetupDB_Scripts();
 
         cfs.forEach(a => {
-            if (a.length > 8) {
+            if (a.length > 6) {
                 const cf = {
                     id: Number(a[0]),
                     name: a[3].toUpperCase(),

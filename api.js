@@ -17,8 +17,7 @@
 
     let client;
     const redis = require("redis");
-
-
+    
     const db___push_cache = (callback) => {
 
         const _DB_CONNECTION = require('tedious').Connection;
@@ -83,12 +82,12 @@
                                 console.log('DB_ROWS = ', dbr_.rows.length);
                                 _self.update_multi(dbr_.rows, (crs_) => {
                                     console.log('PUSH_CACHE = ' + config.port, crs_.ok);
-                                    if (callback) callback();
+                                    if (callback) callback({ ok: true });
                                 });
                             }
                         });
                     } else
-                        if (callback) callback();
+                        if (callback) callback({ ok: true });
                 });
                 break;
             case 'FIRST_FROM_DB':
@@ -99,21 +98,21 @@
                                 console.log('DB PUSH CACHE ' + config.name + ' = ', dbr_.rows.length);
                                 _self.update_multi(dbr_.rows, (crs_) => {
                                     console.log('PUSH_CACHE = ' + config.port, crs_.ok);
-                                    if (callback) callback();
+                                    if (callback) callback({ ok: true });
                                 });
                             }
                         });
                     } else {
                         console.log(config.name + ' CACHED = ' + k);
-                        if (callback) callback();
+                        if (callback) callback({ ok: true });
                     }
                 });
                 break;
             case 'DELETE_ALL':
-                _self.delete_all(callback);
+                _self.delete_all(() => { callback({ ok: true }); });
                 break;
             default:
-                if (callback) callback();
+                if (callback) callback({ ok: true });
                 break;
         }
     };
@@ -122,7 +121,7 @@
         const _self = this;
         if (config_) for (var key in config_) config[key] = config_[key];
 
-        if (config.name == null || config.name.length == 0 || config.port == 0 || config.schema == null)
+        if (config.name == null || config.name.length == 0 || config.port == 0)
             return callback({ ok: false, message: 'Config of name or schema is null or port = 0' });
 
         client = redis.createClient({ port: config.port });
@@ -142,8 +141,9 @@
         });
         client.on("ready", function (error) {
             config.ready = true;
-            //console.log('API_' + config.name + ': \t-> ready');
-            redis___ready(callback);
+            console.log('CACHE_' + config.name + ': \t-> ready');
+            if (config.schema == null) callback({ ok: true });
+            else redis___ready(callback);
         });
         client.on("connect", function (error) {
             config.ready = true;
@@ -238,13 +238,14 @@
     };
     this.load_db = function () {
     };
-
-
+    
     this.valid_add = function (obj) {
         const _self = this;
 
-        //if (obj == null || typeof obj != 'object' || Array.isArray(obj) || Object.keys(obj).length == 0)
-        //    return { ok: false, message: 'Object must be not null or emtpy' };
+        if (config.schema == cf_auto_null) return obj;
+
+        if (obj == null || typeof obj != 'object' || Array.isArray(obj) || Object.keys(obj).length == 0)
+            return { ok: false, message: 'Object must be not null or emtpy' };
 
         const cols = Object.keys(obj);
         const col_schema = Object.keys(config.schema);
