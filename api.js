@@ -2,17 +2,18 @@
     const _ = require('lodash');
 
     const config = {
-        id: 0,
         ready: false,
+        error: '',
+
+        id: 0,
         name: '',
         port: 0,
+        schema: null,
         cmd_install: '',
         sql_scope: null,
         sql_select: null,
         sql_connect: null,
-        schema: null,
-        valid_add: null,
-        error: ''
+        valid_add: null
     };
 
     let client;
@@ -34,11 +35,11 @@
                 return callback({ ok: false, message: err });
             }
 
-            console.log(config.name + ' start the readinf DB ...');
+            console.log(config.name + ' db ...');
 
             const _results = [];
             const request = new _DB_REQUEST(sql_text, function (err_, count_, rows_) {
-                console.log(config.name + ' finish the reading DB ...', _results.length);
+                console.log(config.name + ' ok = ' + _results.length);
                 _DB_CONN.close();
                 callback({ ok: err_ == null, rows: _results, message: err_ });
             });
@@ -141,7 +142,7 @@
         });
         client.on("ready", function (error) {
             config.ready = true;
-            console.log('CACHE_' + config.name + ': \t-> ready');
+            //console.log('CACHE_' + config.name + ': \t-> ready');
             if (config.schema == null) callback({ ok: true });
             else redis___ready(callback);
         });

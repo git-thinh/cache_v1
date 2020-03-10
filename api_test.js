@@ -95,19 +95,18 @@ const CFS_DB = require('./config_db.js').get_config();
 const install_db = (callback) => {
     if (CFS_DB.length == 0) return callback();
     const cf = CFS_DB.shift();
-    console.log(cf.name);
-
-    //API[cf.name] = require('./api.js');
-    //API[cf.name].API = API;
-    //API[cf.name].start(cf, (m_) => {
-    //    if (m_ && m_.ok) {
-    //        console.log('-> API_' + cf.name + ': ready ... \n\n');
-    //    } else {
-    //        console.log('-> API_' + cf.name + ': fail ... \n\n', JSON.stringify(m_), cf);
-    //        API[cf.name] = null;
-    //    }
+    //console.log(cf.name);
+    const api_ = require('./api.js');
+    api_.API = API;
+    api_.start(cf, (m_) => {
+        if (m_ && m_.ok) {
+            API[cf.name] = api_;
+            console.log('-> CACHE_' + cf.name + ': ready ... \n');
+        } else {
+            console.log('-> CACHE_' + cf.name + ': fail ... \n', JSON.stringify(m_), cf);
+        }
         install_db(callback);
-    //});
+    });
 };
 
 install_db(() => {

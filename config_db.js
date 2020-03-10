@@ -12,8 +12,8 @@
             authentication: { type: 'default', options: { userName: 'mobile', password: 'HjdbFV7jos9bc6lw' } },
             options: { database: 'Release_FB51_App' }
         }
-    };
-    const cacheSetupDB_Scripts = () => {
+    }; 
+    this.get_config = function () {
         const sql = {
             PAWN: "SELECT " + _sql_select_top + " *,isnull( (select * from [SplitStringToTable](str_url,'&')),'') as str_campaign FROM mobile.pol_pawn order by id asc",
             CUSTOMER: "SELECT " + _sql_select_top + " * FROM mobile.pol_customer order by id desc",
@@ -448,7 +448,7 @@
             }
         };
 
-        const action = ''; // RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL
+        const action = 'RESET_FROM_DB'; //  | FIRST_FROM_DB | DELETE_ALL
 
         return [
             {
@@ -471,7 +471,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.USER,
-                sql_connect: sql_connect.pos,
+                sql_connect: sql_connect.pos
             },
             {
                 id: 12,
@@ -482,7 +482,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.SHOP,
-                sql_connect: null
+                sql_connect: sql_connect.pos
             },
             {
                 id: 13,
@@ -493,7 +493,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.GROUP,
-                sql_connect: null
+                sql_connect: sql_connect.pos
             },
             {
                 id: 14,
@@ -504,7 +504,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.SYS_SMS,
-                sql_connect: null
+                sql_connect: sql_connect.pol
             },
             {
                 id: 15,
@@ -515,7 +515,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.SYS_EMAIL,
-                sql_connect: null
+                sql_connect: sql_connect.pol
             },
             {
                 id: 16,
@@ -526,7 +526,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.SUPPORT_SCHEDULE,
-                sql_connect: null
+                sql_connect: sql_connect.pol
             },
             {
                 id: 17,
@@ -537,7 +537,7 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.STEP,
-                sql_connect: null
+                sql_connect: sql_connect.pol
             },
             {
                 id: 18,
@@ -548,200 +548,108 @@
                 valid_add: null,
                 cmd_install: action,
                 sql_select: sql.REASON_FAIL,
-                sql_connect: null
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 19,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'PROCESS',
+                port: 10009,
+                schema: schema.PROCESS,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.PROCESS,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 20,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'PRIORITY',
+                port: 10010,
+                schema: schema.PRIORITY,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.PRIORITY,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 21,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'PAWN_DETAIL',
+                port: 10012,
+                schema: schema.PAWN_DETAIL,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.PAWN_DETAIL,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 22,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'NOTIFY',
+                port: 10014,
+                schema: schema.NOTIFY,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.NOTIFY,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 23,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
+                name: 'CUSTOMER',
+                port: 10015,
+                schema: schema.CUSTOMER,
+                valid_add: valid_add.CUSTOMER,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.CUSTOMER,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 24,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'CHANNEL',
+                port: 10016,
+                schema: schema.CHANNEL,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.CHANNEL,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 25,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'ASSET_TYPE',
+                port: 10017,
+                schema: schema.ASSET_TYPE,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.ASSET_TYPE,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 26,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
+                name: 'AREA',
+                port: 10018,
+                schema: schema.AREA,
                 valid_add: null,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
+                sql_select: sql.AREA,
+                sql_connect: sql_connect.pol
             },
             {
-                id: null,
+                id: 27,
                 scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
+                name: 'PAWN',
+                port: 10013,
+                schema: schema.PAWN,
+                valid_add: valid_add.PAWN,
                 cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-            {
-                id: null,
-                scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
-                cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-            {
-                id: null,
-                scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
-                cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-            {
-                id: null,
-                scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
-                cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-            {
-                id: null,
-                scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
-                cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-            {
-                id: null,
-                scope: 'pol',
-                name: null,
-                port: null,
-                schema: null,
-                valid_add: null,
-                cmd_install: action,
-                sql_select: null,
-                sql_connect: null
-            },
-
-            [19, action, 'pol', 'PROCESS', 10009, sql.PROCESS, schema.PROCESS],
-            [20, action, 'pol', 'PRIORITY', 10010, sql.PRIORITY, schema.PRIORITY],
-            [21, action, 'pol', 'PAWN_DETAIL', 10012, sql.PAWN_DETAIL, schema.PAWN_DETAIL],
-            [22, action, 'pol', 'NOTIFY', 10014, sql.NOTIFY, schema.NOTIFY],
-            [23, action, 'pol', 'CUSTOMER', 10015, sql.CUSTOMER, schema.CUSTOMER, valid_add.CUSTOMER],
-            [24, action, 'pol', 'CHANNEL', 10016, sql.CHANNEL, schema.CHANNEL],
-            [25, action, 'pol', 'ASSET_TYPE', 10017, sql.ASSET_TYPE, schema.ASSET_TYPE],
-            [26, action, 'pol', 'AREA', 10018, sql.AREA, schema.AREA, null],
-            [27, action, 'pol', 'PAWN', 10013, sql.PAWN, schema.PAWN, valid_add.PAWN]
-        ];
-    };
-
-    this.get_config = function () {
-        const results = [];
-        const cfs = cacheSetupDB_Scripts();
-
-        cfs.forEach(a => {
-            if (a.length > 6) {
-                const cf = {
-                    id: Number(a[0]),
-                    name: a[3].toUpperCase(),
-                    port: a[4],
-                    cmd_install: a[1],
-                    sql_scope: a[2],
-                    sql_select: a[5],
-                    sql_connect: sql_connect[a[2]],
-                    schema: a[6],
-                    valid_add: a[7]
-                };
-                results.push(cf);
+                sql_select: sql.PAWN,
+                sql_connect: sql_connect.pol
             }
-        });
-
-        //console.log('CFS = ', cfs.length);
-        //console.log('RESULT = ', results.length);
-
-        return results;
+        ];
     };
 };
 
