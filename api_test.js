@@ -2,50 +2,61 @@
 const FS = require('fs');
 const _ = require('lodash');
 
-const API = {};
+
+//#region [ API ]
 
 let id___ = 100;
-const ADDON = {
-    guid_id___: function () {
+const API = {
+    ___guid_id: function (api_id) {
+        if (api_id == null || api_id == 0) api_id = 99;
+
         id___++;
         if (id___ > 999) id___ = 100;
+
         const d = new Date();
-        const id = d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 8) + '' +
+        const id = api_id + '' +
+            d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 8) + '' +
             d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + id___;
+
         return Number(id);
     }
 };
 
-//#region [ ADDON ]
-
-if (FS.existsSync('./addon/')) {
-    FS.readdir('./addon/', (e1_, files_) => {
+if (FS.existsSync('./api/')) {
+    FS.readdir('./api/', (e1_, files_) => {
         if (e1_) {
-            console.log('ADDON_INSTALL: ', e1_);
+            console.log('API_INSTALL: ', e1_);
         } else {
             files_.forEach(file => {
                 const f = file.toLowerCase();
                 if (f.endsWith('.js')) {
-                    const s = FS.readFileSync('./addon/' + file, 'utf-8').trim();
+                    const s = FS.readFileSync('./api/' + file, 'utf-8').trim();
                     if (s.startsWith('function') && s.endsWith('}')) {
                         let pos = s.indexOf('{');
                         let js;
                         if (pos > 0) {
                             pos++;
                             js = s.substr(pos, s.length - pos - 1).trim();
-                            const fc = new Function('o', js);
                             try {
-                                console.log(file, fc(null));
-                                ADDON[f.substr(0, f.length - 3).trim()] = fc;
+                                let fc;
+                                if (f.startsWith('valid___')) {
+                                    fc = new Function('api', 'col', 'obj', 'val', js);
+                                    fc(API, null, null, null);
+                                } else {
+                                    fc = new Function('api', 'obj', js);
+                                    fc(API, null);
+                                }
+                                API[f.substr(0, f.length - 3).trim()] = fc;
+                                console.log('-> API: ', file, ' done');
                             } catch (efc) {
-                                console.log('\nADDON: ', file, efc);
+                                console.log('\n API: ', file, efc);
                             }
                         }
                     }
                 }
             });
 
-            console.log('\nADDON: ', Object.keys(ADDON), '\n');
+            console.log('\n----> API: complete ...\n');
         }
     });
 }
@@ -59,8 +70,8 @@ const CFS_DB = require('./config_db.js').get_config();
 const install_db = (callback) => {
     if (CFS_DB.length == 0) return callback();
     const cf = CFS_DB.shift();
-    API[cf.name] = require('./api.js');
-    API[cf.name].ADDON = ADDON;
+    API[cf.name] = require('./api.js'); 
+    API[cf.name].API = API;
     API[cf.name].start(cf, () => {
         console.log('-> %s = READY ... \n\n', cf.name.toUpperCase());
         install_db(callback);
@@ -91,7 +102,7 @@ RL.on("line", function (text) {
             console.clear();
             break;
         default:
-            console.log(API['PAWN'].valid_add({
+            console.log('\n', API['PAWN'].valid_add({
                 //id: 123,
                 //int_status: 1,
                 //int_status: '1',
@@ -100,6 +111,12 @@ RL.on("line", function (text) {
                 int_cancel_time: 'hhmmss',
                 //int_cancel_time: 123,
                 //col_wrong: 9999,
+
+                int_days: 30,
+                lng_money: 1000000,
+                asset_type_id: 1,
+                city_id: 1,
+                district_id: 1
             }));
 
 

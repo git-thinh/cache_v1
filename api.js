@@ -2,6 +2,7 @@
     const _ = require('lodash');
 
     const config = {
+        id: 0,
         ready: false,
         name: '',
         port: 0,
@@ -173,14 +174,13 @@
         if (obj == null || Array.isArray(obj))
             return callback({ ok: false, message: 'The format of obj must be { ... }' });
 
-        guid_id___().then(id => {
-            let m = obj;
-            if (typeof obj == 'string' || typeof obj == 'number') m = { v: obj };
-            m.id = id;
+        const id = _self.API.___guid_id();
 
-            client.set(id, JSON.stringify(m), function (err, res) {
-                if (callback) callback({ ok: err == null, id: id, object: m, message: err });
-            });
+        let m = obj;
+        if (typeof obj == 'string' || typeof obj == 'number') m = { v: obj };
+        m.id = id;
+        client.set(id, JSON.stringify(m), function (err, res) {
+            if (callback) callback({ ok: err == null, id: id, object: m, message: err });
         });
     };
     this.delete = function (key, callback) {
@@ -259,7 +259,7 @@
 
 
         //[1.2] Valid set value is auto
-        const cf_auto = ['ADDON', 'KEY_IDENTITY', 'yyyyMMdd', 'hhmmss', 'yyyyMMddhhmmss'];
+        const cf_auto = ['API', 'KEY_IDENTITY', 'yyyyMMdd', 'hhmmss', 'yyyyMMddhhmmss'];
         const col_auto = _.filter(_.map(config.schema
             , function (val_, key_) { if (cf_auto.indexOf(val_) != -1) return key_; else return null; })
             , function (o_) { return o_ != null; });
@@ -272,13 +272,13 @@
             col_auto.forEach(col_ => {
                 const val_ = config.schema[col_];
                 switch (val_) {
-                    case 'ADDON':
+                    case 'API':
                         const fn = config.name.toLowerCase() + '___' + col_.toLowerCase();
-                        if (_self.ADDON[fn])
-                            obj[col_] = _self.ADDON[fn]();
+                        if (_self.API[fn])
+                            obj[col_] = _self.API[fn]();
                         break;
                     case 'KEY_IDENTITY':
-                        obj['id'] = _self.ADDON.guid_id___();
+                        obj['id'] = _self.API.___guid_id(config.id);
                         break;
                     case 'hhmmss':
                         obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
@@ -339,7 +339,38 @@
         if (err_type_data.length > 0)
             return { ok: false, message: err_type_data.join(', ') };
 
-        //[3.1] Valid by config call ADDON
+        //[3.1] Valid by config call API
+        if (config.valid_add) {
+            let cf_addon_valid = Object.keys(config.valid_add);
+            cf_addon_valid = _.filter(cf_addon_valid, function (o_) { return col_schema.indexOf(o_) != -1; });
+
+            const col_addon_miss = _.filter(cf_addon_valid, function (o_) { return cols.indexOf(o_) == -1; });
+            //console.log('COLS = ', JSON.stringify(cols));
+            console.log('CF_API_VALID = ', JSON.stringify(cf_addon_valid));
+            console.log('COL_API_MISS = ', JSON.stringify(col_addon_miss));
+
+            if (col_addon_miss.length > 0)
+                return { ok: false, message: col_addon_miss.join(', ') + ' is missing' };
+
+            const cf_addon_valid_result = [];
+            for (var i = 0; i < cf_addon_valid.length; i++) {
+                const col_ = cf_addon_valid[i];
+                const fnv = config.valid_add[col_].name;
+                const para = config.valid_add[col_].para;
+
+                if (_self.API[fnv] == null)
+                    cf_addon_valid_result.push('Function ' + fnv + ' to valid field ' + col_ + ' is missing');
+                else {
+                    const msg = _self.API[fnv](_self.API, col_, obj, para);
+                    if (msg != null && msg.length > 0)
+                        cf_addon_valid_result.push(msg);
+                }
+            }
+
+            console.log('CF_API_VALID_RESULT = ', JSON.stringify(cf_addon_valid_result));
+            if (cf_addon_valid_result.length > 0)
+                return { ok: false, message: cf_addon_valid_result.join(', ') };
+        }
 
         return { ok: true, object: obj };
     };

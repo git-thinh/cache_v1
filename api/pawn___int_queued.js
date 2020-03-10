@@ -1,4 +1,4 @@
-﻿function(o) {
+﻿function(api, obj) {
     //Điều kiện hiển thị đơn:
     //- Null: hiển thị lên màn hình
     //- 0 / 1: không hiển thị(0: trong giờ làm việc, 1: ngoài giờ làm việc)
