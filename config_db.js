@@ -110,7 +110,7 @@
             PAWN: {
                 id: 'KEY_IDENTITY',
 
-                int_queued: -1,
+                int_queued: 'ADDON',
                 int_status: 0,
 
                 step_id: -1,
@@ -164,10 +164,10 @@
 
                 int_created_date: 'yyyyMMdd',
                 int_created_time: 'hhmmss',
-                int_cancel_date: 'null|yyyyMMdd',
-                int_cancel_time: 'null|hhmmss',
-                int_set_caller_online_date: 'null|yyyyMMdd',
-                int_set_caller_online_time: 'null|hhmmss',
+                int_cancel_date: '-1|yyyyMMdd',
+                int_cancel_time: '-1|hhmmss',
+                int_set_caller_online_date: '-1|yyyyMMdd',
+                int_set_caller_online_time: '-1|hhmmss',
 
                 //"ix___": 459002,
                 //"#ids": "  479837   1160 58 20   58  468435 479837 ",
@@ -422,8 +422,8 @@
                 int_created_date: 'yyyyMMdd',
                 int_created_time: 'hhmmss',
 
-                lng_register_datetime: 'yyyyMMddhhmmss',
-                lng_last_trans_datetime: 'yyyyMMddhhmmss',
+                lng_register_datetime: '-1|yyyyMMddhhmmss',
+                lng_last_trans_datetime: '-1|yyyyMMddhhmmss',
 
                 //dtm_register_date: null,
                 //dtm_last_trans: null,
@@ -434,36 +434,51 @@
             }
         };
 
-        // RESET_FROM_DB | FIRST_FROM_DB
+        const valid_add = {
+            CUSTOMER: {
+                str_name: { valid___not_empty: null },
+                str_phone: { valid___is_phone: null }
+            },
+
+            PAWN: {
+                int_days: { valid___greater_than: 30 },
+                lng_money: { valid___greater_than: 500000 },
+                asset_type_id: { valid___greater_than: 0 },
+                city_id: { valid___greater_than: 0 },
+                district_id: { valid___greater_than: 0 }
+            }
+        };
+
+        const action = ''; // RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL
+
         return [
-            //['', 'pol', 'LOG', 10000, null, null],
-            ['FIRST_FROM_DB', 'pos', 'USER', 10001, sql.USER, schema.USER],
-            //['FIRST_FROM_DB', 'pos', 'SHOP', 10002, sql.SHOP, schema.SHOP],
-            //['FIRST_FROM_DB', 'pos', 'GROUP', 10003, sql.GROUP, schema.GROUP],
-            //['FIRST_FROM_DB', 'pol', 'SYS_SMS', 10004, sql.SYS_SMS, schema.SYS_SMS],
-            //['FIRST_FROM_DB', 'pol', 'SYS_EMAIL', 10005, sql.SYS_EMAIL, schema.SYS_EMAIL],
-            //['FIRST_FROM_DB', 'pol', 'SUPPORT_SCHEDULE', 10006, sql.SUPPORT_SCHEDULE, schema.SUPPORT_SCHEDULE],
-            //['FIRST_FROM_DB', 'pol', 'STEP', 10007, sql.STEP, schema.STEP],
-            //['FIRST_FROM_DB', 'pol', 'REASON_FAIL', 10008, sql.REASON_FAIL, schema.REASON_FAIL],
-            //['FIRST_FROM_DB', 'pol', 'PROCESS', 10009, sql.PROCESS, schema.PROCESS],
-            //['FIRST_FROM_DB', 'pol', 'PRIORITY', 10010, sql.PRIORITY, schema.PRIORITY],
-            //['FIRST_FROM_DB', 'pol', 'PAWN_DETAIL', 10012, sql.PAWN_DETAIL, schema.PAWN_DETAIL],
-            //['FIRST_FROM_DB', 'pol', 'NOTIFY', 10014, sql.NOTIFY, schema.NOTIFY],
-            //['FIRST_FROM_DB', 'pol', 'CUSTOMER', 10015, sql.CUSTOMER, schema.CUSTOMER],
-            //['FIRST_FROM_DB', 'pol', 'CHANNEL', 10016, sql.CHANNEL, schema.CHANNEL],
-            //['FIRST_FROM_DB', 'pol', 'ASSET_TYPE', 10017, sql.ASSET_TYPE, schema.ASSET_TYPE],
-            //['FIRST_FROM_DB', 'pol', 'AREA', 10018, sql.AREA, schema.AREA],
-            //['FIRST_FROM_DB', 'pol', 'PAWN', 10013, sql.PAWN, schema.PAWN]
+            //['', 'pol', 'LOG', 10000, null, null, null],
+            //[action, 'pos', 'USER', 10001, sql.USER, schema.USER, null],
+            //[action, 'pos', 'SHOP', 10002, sql.SHOP, schema.SHOP, null],
+            //[action, 'pos', 'GROUP', 10003, sql.GROUP, schema.GROUP, null],
+            //[action, 'pol', 'SYS_SMS', 10004, sql.SYS_SMS, schema.SYS_SMS, null],
+            //[action, 'pol', 'SYS_EMAIL', 10005, sql.SYS_EMAIL, schema.SYS_EMAIL, null],
+            //[action, 'pol', 'SUPPORT_SCHEDULE', 10006, sql.SUPPORT_SCHEDULE, schema.SUPPORT_SCHEDULE, null],
+            //[action, 'pol', 'STEP', 10007, sql.STEP, schema.STEP, null],
+            //[action, 'pol', 'REASON_FAIL', 10008, sql.REASON_FAIL, schema.REASON_FAIL, null],
+            //[action, 'pol', 'PROCESS', 10009, sql.PROCESS, schema.PROCESS, null],
+            //[action, 'pol', 'PRIORITY', 10010, sql.PRIORITY, schema.PRIORITY, null],
+            [action, 'pol', 'PAWN_DETAIL', 10012, sql.PAWN_DETAIL, schema.PAWN_DETAIL, null],
+            //[action, 'pol', 'NOTIFY', 10014, sql.NOTIFY, schema.NOTIFY, null],
+            [action, 'pol', 'CUSTOMER', 10015, sql.CUSTOMER, schema.CUSTOMER, valid_add.CUSTOMER, null],
+            //[action, 'pol', 'CHANNEL', 10016, sql.CHANNEL, schema.CHANNEL, null],
+            //[action, 'pol', 'ASSET_TYPE', 10017, sql.ASSET_TYPE, schema.ASSET_TYPE, null],
+            //[action, 'pol', 'AREA', 10018, sql.AREA, schema.AREA, null],
+            [action, 'pol', 'PAWN', 10013, sql.PAWN, schema.PAWN, valid_add.PAWN, null]
         ];
     };
-
 
     this.get_config = function () {
         const results = [];
         const cfs = cacheSetupDB_Scripts();
 
         cfs.forEach(a => {
-            if (a.length > 5) {
+            if (a.length > 6) {
                 const cf = {
                     name: a[2].toUpperCase(),
                     port: a[3],
@@ -471,7 +486,8 @@
                     sql_scope: a[1],
                     sql_select: a[4],
                     sql_connect: sql_connect[a[1]],
-                    schema: a[5]
+                    schema: a[5],
+                    valid_add: a[6]
                 };
                 results.push(cf);
             }
@@ -482,8 +498,6 @@
 
         return results;
     };
-
-
 };
 
 config_db.instance = null;

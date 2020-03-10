@@ -1,37 +1,22 @@
 ﻿let api = function api() {
+    const _ = require('lodash');
+
     const config = {
         ready: false,
-        name: 'API_BASE',
+        name: '',
         port: 0,
         cmd_install: '',
         sql_scope: null,
         sql_select: null,
         sql_connect: null,
+        schema: null,
+        valid_add: null,
         error: ''
     };
 
     let client;
     const redis = require("redis");
 
-    let id___ = 100;
-    const guid_id___ = async () => {
-        return new Promise((resolve, reject) => {
-            const t = Math.floor(Math.random() * 99) + 1;
-            setTimeout(function () {
-                id___++;
-                if (id___ > 999) id___ = 100;
-
-                const d = new Date();
-                const id = d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 6) + '' +
-                    d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + id___;
-                    //(Math.floor(Math.random() * 999) + k + 100).toString().substr(0, 3);
-
-                //console.log(id);
-
-                resolve(Number(id));
-            }, t);
-        });
-    };
 
     const db___push_cache = (callback) => {
 
@@ -39,7 +24,7 @@
         const _DB_REQUEST = require('tedious').Request;
         const _DB_TYPES = require('tedious').TYPES;
 
-        const conn_str = config.sql_connect[config.sql_scope];
+        const conn_str = config.sql_connect;
         const sql_text = config.sql_select;
         const _DB_CONN = new _DB_CONNECTION(conn_str);
 
@@ -123,6 +108,9 @@
                     }
                 });
                 break;
+            case 'DELETE_ALL':
+                _self.delete_all(callback);
+                break;
             default:
                 if (callback) callback();
                 break;
@@ -132,6 +120,9 @@
     this.start = function (config_, callback) {
         const _self = this;
         if (config_) for (var key in config_) config[key] = config_[key];
+
+        if (config.name == null || config.name.length == 0 || config.port == 0 || config.schema == null)
+            return callback({ ok: false, message: 'Config of name or schema is null or port = 0' });
 
         client = redis.createClient({ port: config.port });
         client.on("error", function (error) {
@@ -188,7 +179,7 @@
             m.id = id;
 
             client.set(id, JSON.stringify(m), function (err, res) {
-                if (callback) callback({ ok: err == null, id: id, message: err });
+                if (callback) callback({ ok: err == null, id: id, object: m, message: err });
             });
         });
     };
@@ -237,41 +228,120 @@
             return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
 
         client.flushall('ASYNC', function (err) {
+            console.log(config.name, ' -> DELETE_ALL: OK');
             if (callback) callback({ ok: err == null, message: err });
         });
     };
 
-    this.indexs = function (callback) {
+    this.index = function (callback) {
         if (callback) callback();
     };
+    this.load_db = function () {
+    };
 
-    this.build_new_object = (callback) => {
-        let v;
 
-        switch (v) {
-            //case -1:
-            //    v = 0;
-            //    break;
-            case 'KEY_IDENTITY':
-                guid_id___((id) => {
-                    return callback(id);
-                });
-                break;
-            case 'null|yyyyMMdd':
-                break;
-            case 'null|hhmmss':
-                break;
-            case 'yyyyMMdd':
-                break;
-            case 'hhmmss':
-                break;
-            case 'yyyyMMddhhmmss':
-                break;
-            default:
-                break;
+    this.valid_add = function (obj) {
+        const _self = this;
+
+        //if (obj == null || typeof obj != 'object' || Array.isArray(obj) || Object.keys(obj).length == 0)
+        //    return { ok: false, message: 'Object must be not null or emtpy' };
+
+        const cols = Object.keys(obj);
+        const col_schema = Object.keys(config.schema);
+        //console.log('COLS = ', JSON.stringify(cols));
+        //console.log('COL_SCHEMA = ', JSON.stringify(col_schema));
+
+        //[1.1] Valid col is not exist into schema
+        const col_wrong = _.filter(cols, function (o_) { return col_schema.indexOf(o_) == -1; });
+        //console.log('ERR_COL_WRONG = ', JSON.stringify(col_wrong));
+        if (col_wrong.length > 0)
+            return { ok: false, message: col_wrong.join(', ') + ': field invalid' };
+
+
+        //[1.2] Valid set value is auto
+        const cf_auto = ['ADDON', 'KEY_IDENTITY', 'yyyyMMdd', 'hhmmss', 'yyyyMMddhhmmss'];
+        const col_auto = _.filter(_.map(config.schema
+            , function (val_, key_) { if (cf_auto.indexOf(val_) != -1) return key_; else return null; })
+            , function (o_) { return o_ != null; });
+        const err_auto = _.filter(cols, function (o_) { return col_auto.indexOf(o_) != -1; });
+        //console.log('AUTO = ', JSON.stringify(col_auto));
+        //console.log('ERR_AUTO = ', JSON.stringify(err_auto));
+        if (err_auto.length > 0)
+            return { ok: false, message: err_auto.join(', ') + ': fields have values set auto as follow: ' + cf_auto.join(', ') };
+        else {
+            col_auto.forEach(col_ => {
+                const val_ = config.schema[col_];
+                switch (val_) {
+                    case 'ADDON':
+                        const fn = config.name.toLowerCase() + '___' + col_.toLowerCase();
+                        if (_self.ADDON[fn])
+                            obj[col_] = _self.ADDON[fn]();
+                        break;
+                    case 'KEY_IDENTITY':
+                        obj['id'] = _self.ADDON.guid_id___();
+                        break;
+                    case 'hhmmss':
+                        obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                        break;
+                    case 'yyyyMMdd':
+                        obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8));
+                        break;
+                    case 'yyyyMMddhhmmss':
+                        obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8) + '' + new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                        break;
+                }
+            });
         }
 
-        return callback(v);
+
+        //[1.3] Valid set value is auto -1 or yyyyMMdd,hhmmss,yyyyMMddhhmmss
+        const cf_auto_null = ['-1|yyyyMMdd', '-1|hhmmss', '-1|yyyyMMddhhmmss'];
+        const col_auto_null = _.filter(_.map(config.schema
+            , function (val_, key_) { if (cf_auto_null.indexOf(val_) != -1) return key_; else return null; })
+            , function (o_) { return o_ != null; });
+        const err_auto_null = _.filter(cols, function (o_) { return col_auto_null.indexOf(o_) != -1; });
+        //console.log('AUTO_NULL = ', JSON.stringify(col_auto_null));
+        //console.log('ERR_AUTO_NULL = ', JSON.stringify(err_auto_null));
+        const err_auto_null_results = [];
+        col_auto_null.forEach(col_ => {
+            const v1 = config.schema[col_].substr(3);
+            const v2 = obj[col_];
+            if (v2 == null || v2 == -1 || v2 == '-1') {
+                obj[col_] = -1;
+            } else if (v2 == 'hhmmss' || v2 == 'yyyyMMdd' || v2 == 'yyyyMMddhhmmss') {
+                switch (v1) {
+                    case 'hhmmss':
+                        obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                        break;
+                    case 'yyyyMMdd':
+                        obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8));
+                        break;
+                    case 'yyyyMMddhhmmss':
+                        obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8) + '' + new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                        break;
+                }
+            } else {
+                err_auto_null_results.push(col_ + ' must be value is -1 or ' + v1);
+            }
+        });
+        if (err_auto_null_results.length > 0)
+            return { ok: false, message: err_auto_null_results.join(', ') };
+
+        //[2.1] Valid type data (not belong case 1.3)
+        const col_type_data = _.filter(cols, function (o_) { return err_auto_null.indexOf(o_) == -1; });
+        console.log('COL_TYPE_DATA = ', JSON.stringify(col_type_data));
+        const err_type_data = [];
+        col_type_data.forEach(col_ => {
+            const typ = typeof config.schema[col_];
+            if (typeof obj[col_] != typ)
+                err_type_data.push(col_ + ' has type ' + typ + ' and value default is ' + config.schema[col_]);
+        });
+        if (err_type_data.length > 0)
+            return { ok: false, message: err_type_data.join(', ') };
+
+        //[3.1] Valid by config call ADDON
+
+        return { ok: true, object: obj };
     };
 };
 
