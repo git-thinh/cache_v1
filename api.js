@@ -243,7 +243,7 @@
     this.valid_add = function (obj) {
         const _self = this;
 
-        if (config.schema == cf_auto_null) return obj;
+        if (config.schema == null) return obj;
 
         if (obj == null || typeof obj != 'object' || Array.isArray(obj) || Object.keys(obj).length == 0)
             return { ok: false, message: 'Object must be not null or emtpy' };

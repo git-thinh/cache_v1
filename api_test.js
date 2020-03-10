@@ -129,6 +129,13 @@ RL.on("line", function (text) {
         case 'cls':
             console.clear();
             break;
+        case 'bgsave':
+            console.clear();
+            API['USER'].send_command('BGSAVE', function (err, reply) {
+                console.log(err);
+                console.log(reply);
+            });
+            break;
         case 'reload':
             console.clear();
             if (a.length > 1) {

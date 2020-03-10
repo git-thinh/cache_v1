@@ -448,7 +448,7 @@
             }
         };
 
-        const action = 'RESET_FROM_DB'; //  | FIRST_FROM_DB | DELETE_ALL
+        const action = ''; // RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL
 
         return [
             {
