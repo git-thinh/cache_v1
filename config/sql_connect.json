@@ -1,0 +1,28 @@
+{
+  "pol": {
+    "server": "192.168.10.54",
+    "authentication": {
+      "type": "default",
+      "options": {
+        "userName": "sa",
+        "password": "dev@123"
+      }
+    },
+    "options": {      
+      "database": "POL_20191230_020320"
+    }
+  },
+  "pos": {
+    "server": "192.168.10.37",
+    "authentication": {
+      "type": "default",
+      "options": {
+        "userName": "mobile",
+        "password": "HjdbFV7jos9bc6lw"
+      }
+    },
+    "options": {
+      "database": "Release_FB51_App" 
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "str_name": {
+    "name": "valid___not_empty",
+    "para": null
+  },
+  "str_phone": {
+    "name": "valid___is_phone",
+    "para": null
+  }
+}
