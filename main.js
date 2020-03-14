@@ -1,9 +1,10 @@
-﻿const FS = require('fs');
+﻿const { inspect } = require('util');
+const FS = require('fs');
 const _ = require('lodash');
 
 const ___SCOPE = 'MAIN';
 const ___CLEAN_LOG = true;
-const API = { id___: 100, config: null, busy: false };
+const API = { id___: 100, config: null, busy: false, busy_func: {}, cache: {} };
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');
@@ -104,20 +105,27 @@ const api___reset_all = (callback) => {
 
 //#endregion
 
-//#region [ APP START ]
+//#region [ APP START, INIT CACHE ]
+
+const app___init_cache = (configs, callback) => {
+
+    if (configs.length == 0) return callback();
+
+    const caches = [];
+    configs.forEach(cf => {
+        API.cache[cf.name] = require('./im_cache.js');
+        API.cache[cf.name].API = API;
+        const p = API.cache[cf.name].init(cf);
+        caches.push(p);
+    });
+
+    Promise.all(caches).then(rs => { callback(); }); 
+};
 
 const app___start = () => {
     const LOG_KEY = 'START';
 
     const p1 = new Promise(function (resolve, reject) {
-        api___reset_all(() => {
-            console.log('Load API done ...');
-            ___log_key(LOG_KEY, 'API', Object.keys(API));
-            resolve({ ok: true });
-        });
-    });
-
-    const p2 = new Promise(function (resolve, reject) {
         im_config.get().then(cfs => {
             API.config = cfs;
             console.log('Load config done ...');
@@ -125,6 +133,15 @@ const app___start = () => {
             resolve({ ok: true, data: cfs });
         });
     });
+
+    const p2 = new Promise(function (resolve, reject) {
+        api___reset_all(() => {
+            console.log('Load API done ...');
+            ___log_key(LOG_KEY, 'API', Object.keys(API));
+            resolve({ ok: true });
+        });
+    });
+
     const p3 = new Promise(function (resolve, reject) {
         im_http.API = API;
         im_http.start({ port: HTTP_PORT }, () => {
@@ -136,7 +153,9 @@ const app___start = () => {
 
     Promise.all([p1, p2, p3]).then(rs => {
         const ok = rs.length == 3 && rs[0].ok && rs[1].ok && rs[2].ok;
-        app___start_callback(ok);
+        app___init_cache(rs[0].data, () => {
+            app___start_callback(ok);
+        });
     });
 };
 
@@ -154,19 +173,80 @@ const app___start_callback = (ok) => {
 
 const READ_LINE = require("readline");
 const RL = READ_LINE.createInterface({ input: process.stdin, output: process.stdout });
-RL.on("line", function (text) {
+RL.on("line", function (line) {
+    let text = line.trim();
+    const has_pushLog = text.endsWith('?log');
+    if (has_pushLog) text = text.substr(0, text.length - 4).trim();
     const a = text.split(' ');
     let cmd = a[0].toLowerCase();
     switch (cmd) {
         case 'exit':
             process.exit();
             break;
-        case 'cls':
+        case '-help':
+        case '--help':
             console.clear();
+            const helps = [
+                '- ?log = push to redis log at port 11111 on key MAIN.???',
+
+                '- cls|clear|clean = Clean terminal console.log',
+
+                '- config = Display config',
+
+                '- api.key = Display keys of object API',
+                '- reload (|file_api.js) = Reload all script | reload only a file_api.js',
+
+                '- cache.key = Display keys of Cache Engine',
+                '- cache.load_db KEY = Load DB into cache engin by KEY',
+                '- cache.load_redis = Load Redis into cache engin by KEY',
+            ];
+            console.log('Help input command:\n\t', helps.join('\n\t'));
+            break;
+        case 'cls':
+        case 'clear':
+            console.clear();
+            break;
+        case 'config':
+            console.clear();
+            if (has_pushLog)                
+                ___log_key(cmd, API.config);
+            else
+                console.log(inspect(API.config));
             break;
         case 'api.keys':
             console.clear();
-            console.log(_.sortBy(Object.keys(API)));
+            if (has_pushLog)
+                ___log_key(cmd, _.sortBy(Object.keys(API)));
+            else
+                console.log(_.sortBy(Object.keys(API)));
+            break;
+        case 'reload':
+            console.clear();
+            if (a.length > 1) {
+                const file = a[1].toLowerCase();
+                API.busy_func[file] = true;
+                api___init_file(file);
+                API.busy_func[file] = false;
+            } else {
+                api___reset_all(() => {
+                    console.log('RESET ALL API done ...');
+                });
+            }
+            break;
+        case 'cache.key':
+            console.clear();
+            if (has_pushLog)
+                ___log_key(cmd, _.sortBy(Object.keys(API.cache)));
+            else
+                console.log(_.sortBy(Object.keys(API.cache)));
+            break;
+        case 'cache.load_db':
+            console.clear();
+
+            break;
+        case 'cache.load_redis':
+            console.clear();
+
             break;
         case 'bgsave':
             console.clear();
@@ -174,20 +254,6 @@ RL.on("line", function (text) {
                 console.log(err);
                 console.log(reply);
             });
-            break;
-        case 'reload':
-            console.clear();
-            if (a.length > 1) {
-                const file = a[1].toLowerCase();
-                API.busy = true;
-                api___init_file(file);
-                API.busy = false;
-
-            } else {
-                api___reset_all(() => {
-                    console.log('RESET ALL API done ...');
-                });
-            }
             break;
         default:
             //console.log('\n', API['PAWN'].valid_add({
@@ -222,4 +288,5 @@ RL.on("line", function (text) {
             break;
     }
 });
+
 //#endregion

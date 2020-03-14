@@ -11,14 +11,14 @@
     "scope": "pos",
     "name": "USER",
     "port": 10001,
-    "enable": false
+    "enable": true
   },
   {
     "id": 12,
     "scope": "pos",
     "name": "SHOP",
     "port": 10002,
-    "enable": false
+    "enable": true
   },
   {
     "id": 13,

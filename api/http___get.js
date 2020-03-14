@@ -11,7 +11,7 @@
         str_action == null || str_action.length == 0)
         return res.json({ ok: false, message: 'URI must be format is /?api=...&action=...', time: new Date().toLocaleString() });
 
-    func = (str_api + '___' + str_action).toLowerCase();
+    func = ('http___' + str_api + '_' + str_action).toLowerCase();
     if (api[func] == null)
         return res.json({ ok: false, message: 'Cannot find API: ' + func, time: new Date().toLocaleString() });
 

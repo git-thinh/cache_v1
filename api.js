@@ -5,15 +5,19 @@
         ready: false,
         error: '',
 
+        enable: false,
+        scope: null,
         id: 0,
         name: '',
         port: 0,
         schema: null,
+
         cmd_install: '',
-        sql_scope: null,
+        valid_add: null,
+
+        select_top: null,
         sql_select: null,
-        sql_connect: null,
-        valid_add: null
+        sql_connect: null
     };
 
     let client;
@@ -117,6 +121,43 @@
                 break;
         }
     };
+
+
+    this.init = function (config_, callback) {
+        const _self = this;
+        if (config_) for (var key in config_) config[key] = config_[key];
+
+        if (config.name == null || config.name.length == 0 || config.port == 0)
+            return callback({ ok: false, message: 'Config of name or schema is null or port = 0' });
+
+        client = redis.createClient({ port: config.port });
+        client.on("error", function (error) {
+            if (config.ready) {
+                config.ready = false;
+                config.error = error.message;
+                console.log('API_' + config.name + ':', error);
+            } else if (config.error != error.message) {
+                config.error = error.message;
+                console.log('API_' + config.name + ':', error);
+            }
+        });
+        client.on("end", function (error) {
+            config.ready = false;
+            console.log('API_' + config.name + ': \t-> end');
+        });
+        client.on("ready", function (error) {
+            config.ready = true;
+            //console.log('CACHE_' + config.name + ': \t-> ready');
+            if (config.schema == null) callback({ ok: true });
+            else redis___ready(callback);
+        });
+        client.on("connect", function (error) {
+            config.ready = true;
+            //console.log('API_' + config.name + ': \t-> connect');
+        });
+        return _self;
+    };
+
 
     this.start = function (config_, callback) {
         const _self = this;
