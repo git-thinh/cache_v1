@@ -2,17 +2,11 @@
 const _ = require('lodash');
 
 const ___SCOPE = 'MAIN';
-const ___ENVIRONMENT_DEV = true;
 const ___CLEAN_LOG = true;
-
-const API = {
-    id___: 100,
-    config: null,
-    busy: false
-};
+const API = { id___: 100, config: null, busy: false };
 
 const im_config = require('./im_config.js');
-const http = require('./http.js');
+const im_http = require('./im_http.js');
 const HTTP_PORT = 20000;
 
 //#region [ LOG ]
@@ -26,6 +20,10 @@ LOG.start(0, ___SCOPE, () => {
     ___log = (...agrs) => LOG.write(...agrs);
     ___log_key = (key, ...agrs) => LOG.write_key(key, ...agrs);
     ___log_err_throw = (func_name, err_throw, para1, para2, para3) => LOG.write(___SCOPE + '.ERR_THROW', func_name, err_throw, para1, para2, para3);
+
+    API.___log = ___log;
+    API.___log_key = ___log_key;
+    API.___log_err_throw = ___log_err_throw;
 
     console.log('LOG ready ...');
     app___start();
@@ -128,8 +126,8 @@ const app___start = () => {
         });
     });
     const p3 = new Promise(function (resolve, reject) {
-        http.API = API;
-        http.start({ port: HTTP_PORT }, () => {
+        im_http.API = API;
+        im_http.start({ port: HTTP_PORT }, () => {
             console.log('\n----> HTTP ' + HTTP_PORT + ' ready...');
             ___log_key(LOG_KEY, 'start HTTP_PORT = ' + HTTP_PORT);
             resolve({ ok: true });
@@ -166,6 +164,10 @@ RL.on("line", function (text) {
         case 'cls':
             console.clear();
             break;
+        case 'api.keys':
+            console.clear();
+            console.log(_.sortBy(Object.keys(API)));
+            break;
         case 'bgsave':
             console.clear();
             API['USER'].send_command('BGSAVE', function (err, reply) {
@@ -188,22 +190,22 @@ RL.on("line", function (text) {
             }
             break;
         default:
-            console.log('\n', API['PAWN'].valid_add({
-                //id: 123,
-                //int_status: 1,
-                //int_status: '1',
-                //int_cancel_time: null,
-                //int_cancel_time: 'asdasd',
-                int_cancel_time: 'hhmmss',
-                //int_cancel_time: 123,
-                //col_wrong: 9999,
+            //console.log('\n', API['PAWN'].valid_add({
+            //    //id: 123,
+            //    //int_status: 1,
+            //    //int_status: '1',
+            //    //int_cancel_time: null,
+            //    //int_cancel_time: 'asdasd',
+            //    int_cancel_time: 'hhmmss',
+            //    //int_cancel_time: 123,
+            //    //col_wrong: 9999,
 
-                int_days: 30,
-                lng_money: 1000000,
-                asset_type_id: 1,
-                city_id: 1,
-                district_id: 1
-            }));
+            //    int_days: 30,
+            //    lng_money: 1000000,
+            //    asset_type_id: 1,
+            //    city_id: 1,
+            //    district_id: 1
+            //}));
 
 
             //if (a.length > 1 && API[cmd] && API[cmd][a[1]]) {

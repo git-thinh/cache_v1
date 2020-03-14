@@ -1,8 +1,8 @@
-﻿let http = function http() {
+﻿let im_http = function im_http() {
     let config = {
         port: 20000,
         ip: '127.0.0.1',
-        uri_start: '/pol/api',
+        uri_start: '/pol/api'
     };
 
     const HTTP_EXPRESS = require('express');
@@ -32,9 +32,9 @@
     };
 };
 
-http.instance = null;
-http.getInstance = function () {
-    if (this.instance === null) this.instance = new http();
+im_http.instance = null;
+im_http.getInstance = function () {
+    if (this.instance === null) this.instance = new im_http();
     return this.instance;
 };
-module.exports = http.getInstance();
+module.exports = im_http.getInstance();
