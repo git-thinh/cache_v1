@@ -59,16 +59,4 @@
 	"int_cancel_time": "-1|hhmmss",
 	"int_set_caller_online_date": "-1|yyyyMMdd",
 	"int_set_caller_online_time": "-1|hhmmss"
-
-	//"ix___": 459002,
-	//"#ids": "  479837   1160 58 20   58  468435 479837 ",
-	//"#ascii": " 1 20200217 0948003456 tests qlch quan ly ch f88 tests qlkv0 qlkv0 quan ly cua hang test 1 1 dien thoai 20200217 ",
-	//"#utf8": "  1 1 quản lý cửa hàng tests f88 tests qlkv0 qlkv0 quản lý cửa hàng test ô tô điện thoại an giang 1 an phú  ",
-	//"#org": "1 1 Ô tô",
-	//"___customer": { },
-	//"___caller_shop": { },
-	//"___caller_online": { },
-	//"___group": { },
-	//"___list_support_schedule": [ ],
-	//"___list_online_process": [ ]
 }

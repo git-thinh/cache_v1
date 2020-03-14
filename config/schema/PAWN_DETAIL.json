@@ -9,10 +9,6 @@
   "lng_register_datetime": "-1|yyyyMMddhhmmss",
   "lng_last_trans_datetime": "-1|yyyyMMddhhmmss",
 
-  //dtm_register_date: null,
-  //dtm_last_trans: null,
   "int_urgent_level": -1,
   "int_order_priority": -1
-
-  //"ix___": 468434
 }

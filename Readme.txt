@@ -1,4 +1,16 @@
-﻿
+﻿node --max-old-space-size=4096 ___main_127.js
+node --max-old-space-size=4096 ___main_20200311_10PM.js
+
+c:\log_11111\redis-server.exe --service-install --service-name log_11111 --port 11111
+npm install redis
+
+
+c:\jpol_pawn_care_20002\redis-server.exe --service-install --service-name jpol_pawn_care_20002 --port 20002
+c:\jpol_pawn_chiatay_20001\redis-server.exe --service-install --service-name jpol_pawn_chiatay_20001 --port 20001
+c:\jpol_pawn_addnew_edit_20000\redis-server.exe --service-install --service-name jpol_pawn_addnew_edit_20000 --port 20000
+
+
+
 node --max-old-space-size=4096 api_test.js
 
 
