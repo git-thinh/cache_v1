@@ -17,6 +17,7 @@ node --max-old-space-size=4096 api_test.js
 load ./txt-full/POL_PROCESS.txt
 load ./txt/POL_PROCESS.txt
 
+c:\db_sync_19999\redis-server.exe --service-install --service-name db_sync_19999 --port 19999
 
 c:\pol_log_10000\redis-server.exe --service-install --service-name pol_log_10000 --port 10000
 

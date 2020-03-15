@@ -1,5 +1,6 @@
 ﻿module.exports = function (config_) {
     this.items = [];
+    this.indexs = {};
 
     this.config = {
         id: 0,
@@ -18,19 +19,16 @@
     if (config_) for (var key in config_) this.config[key] = config_[key];
 
     let client;
+    let db;
 
     const redis = require("redis");
     const _ = require('lodash');
-
-    const _DB_CONNECTION = require('tedious').Connection;
-    const _DB_REQUEST = require('tedious').Request;
-    const _DB_TYPES = require('tedious').TYPES;
 
     this.ok = false;
     this.message = '';
     this.ready = false;
     this.busy = false;
-    
+
     this.___convert_unicode_to_ascii = function (str) {
         if (str == null || str.length == 0) return '';
         try {
@@ -74,7 +72,18 @@
 
         return str;
     };
-    
+    let id___ = 100;
+    this.___guid_id = () => {
+        id___++;
+        if (id___ > 999) id___ = 100;
+
+        const d = new Date();
+        const id = d.toISOString().slice(-24).replace(/\D/g, '').slice(2, 8) + '' +
+            d.toTimeString().split(' ')[0].replace(/\D/g, '') + '' + id___;
+
+        return Number(id);
+    };
+
     this.start = function (callback) {
         const _self = this;
         const config = _self.config;
@@ -84,31 +93,90 @@
             return callback(_self);
         }
 
-        client = redis.createClient({ port: config.port });
-        client.on("error", function (error) {
-            if (_self.ready) {
+        const p1 = new Promise(function (resolve, reject) {
+            client = redis.createClient({ port: config.port });
+            client.on("error", function (error) {
+                if (_self.ready) {
+                    _self.ready = false;
+                    _self.message = error.message;
+                    console.log('API_' + config.name + ':', error);
+                } else if (_self.message != error.message) {
+                    console.log('API_' + config.name + ':', error);
+                    _self.message = error.message;
+                    return resolve(false);
+                }
+            });
+            client.on("end", function (error) {
                 _self.ready = false;
-                _self.message = error.message;
-                console.log('API_' + config.name + ':', error);
-            } else if (_self.message != error.message) {
-                console.log('API_' + config.name + ':', error);
-                _self.message = error.message;
-                return callback(_self);
-            }
+                console.log('API_' + config.name + ': \t-> end');
+            });
+            client.on("ready", function (error) {
+                _self.ready = true;
+                _self.ok = true;
+                return resolve(true);
+            });
+            client.on("connect", function (error) {
+                _self.ready = true;
+                //console.log('API_' + config.name + ': \t-> connect');
+            });
         });
-        client.on("end", function (error) {
-            _self.ready = false;
-            console.log('API_' + config.name + ': \t-> end');
+        const p2 = new Promise(function (resolve, reject) {
+            db = redis.createClient({ port: 19999 });
+            db.on("error", function (error) {
+                if (_self.ready) {
+                    _self.db_ready = false;
+                    _self.db_message = error.message;
+                    console.log('DB_' + config.name + ':', error);
+                } else if (_self.db_message != error.message) {
+                    console.log('DB_' + config.name + ':', error);
+                    _self.db_message = error.message;
+                    return resolve(false);
+                }
+            });
+            db.on("end", function (error) {
+                _self.db_ready = false;
+                console.log('DB_' + config.name + ': \t-> end');
+            });
+            db.on("ready", function (error) {
+                _self.db_ready = true;
+                return resolve(true);
+            });
+            db.on("connect", function (error) {
+                _self.db_ready = true;
+                //console.log('API_' + config.name + ': \t-> connect');
+            });
         });
-        client.on("ready", function (error) {
-            _self.ready = true;
-            _self.ok = true;
-            return callback(_self);
+
+        Promise.all([p1, p2]).then(rsa => {
+            const it = rsa[0] && rsa[1] ? _self : null;
+            callback(it);
         });
-        client.on("connect", function (error) {
-            _self.ready = true;
-            //console.log('API_' + config.name + ': \t-> connect');
-        });
+
+        ////client = redis.createClient({ port: config.port });
+        ////client.on("error", function (error) {
+        ////    if (_self.ready) {
+        ////        _self.ready = false;
+        ////        _self.message = error.message;
+        ////        console.log('API_' + config.name + ':', error);
+        ////    } else if (_self.message != error.message) {
+        ////        console.log('API_' + config.name + ':', error);
+        ////        _self.message = error.message;
+        ////        return callback(_self);
+        ////    }
+        ////});
+        ////client.on("end", function (error) {
+        ////    _self.ready = false;
+        ////    console.log('API_' + config.name + ': \t-> end');
+        ////});
+        ////client.on("ready", function (error) {
+        ////    _self.ready = true;
+        ////    _self.ok = true;
+        ////    return callback(_self);
+        ////});
+        ////client.on("connect", function (error) {
+        ////    _self.ready = true;
+        ////    //console.log('API_' + config.name + ': \t-> connect');
+        ////});
     };
     this.get_config = () => {
         const _self = this;
@@ -132,10 +200,315 @@
 
         _self.busy = true;
         client.flushall('ASYNC', function (err) {
+            _self.items = [];
+            _self.indexs = {};
             _self.busy = false;
             console.log(config.name, ' -> DELETE_ALL: OK');
             callback({ ok: err == null, message: err });
         });
+    };
+
+    this.search = (fn, page_size) => {
+        const _self = this;
+        if (fn == null || typeof fn != 'function') return { ok: false };
+
+        const total = _self.items.length;
+        const ids = [], its = [];
+        for (var i = 0; i < total; i++) {
+            if (fn(_self.items[i])) {
+                ids.push(_self.items[i].id);
+                if (ids.length <= page_size) its.push(_self.items[i]);
+            }
+        }
+        return { ok: true, total: total, page_size: page_size, ids: ids, data: its };
+    };
+    this.get_ids = (ids) => {
+        const _self = this;
+        if (ids == null || Array.isArray(ids) == false || ids.length == 0) return [];
+        const a = _.map(ids, function (o_) { return _self.indexs[o_]; });
+        return a;
+    };
+    this.get_all = () => {
+        const _self = this;
+        return _self.items;
+    };
+
+    this.index_update = function (o) {
+        const _self = this;
+
+        const it = _self.indexs[o.id];
+        if (it) {
+            for (var key in o) it[key] = o[key];
+
+            const ids = [], utf8 = [];
+            for (var c in it) {
+                if (it[c] != null || it[c] != -1) {
+                    if (typeof it[c] == 'number') ids.push(it[c]);
+                    else utf8.push(it[c]);
+                }
+            }
+
+            it['#ids'] = ids.join(' ');
+            it['#utf8'] = utf8.join(' ');
+            it['#ascii'] = _self.___convert_unicode_to_ascii(it['#utf8']);
+            it['#org'] = it['#ids'] + ' ' + it['#utf8'];
+
+            return it;
+        }
+
+        return null;
+    };
+    this.index_addnew = function (o) {
+        const _self = this;
+
+        const ids = [], utf8 = [];
+        for (var c in o) {
+            if (o[c] != null || o[c] != -1) {
+                if (typeof o[c] == 'number') ids.push(o[c]);
+                else utf8.push(o[c]);
+            }
+        }
+
+        o['#ids'] = ids.join(' ');
+        o['#utf8'] = utf8.join(' ');
+        o['#ascii'] = _self.___convert_unicode_to_ascii(o['#utf8']);
+        o['#org'] = o['#ids'] + ' ' + o['#utf8'];
+
+        o.ix___ = _self.items.length;
+        _self.indexs[o.id] = o;
+
+        return o;
+    };
+
+    this.addnew = function (obj, callback) {
+        const _self = this;
+        const config = _self.config;
+
+        if (client == null || config.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
+
+        if (obj == null || Array.isArray(obj) || typeof obj != 'object')
+            return callback({ ok: false, message: 'The format of obj must be { ... }' });
+
+        if (obj.id != null && _self.indexs[obj.id] != null)
+            return callback({ ok: false, message: 'Object has ID = ' + obj.id + ' exist' });
+
+        if (obj.id == null || obj.id == 0) obj.id = _self.___guid_id();
+
+        const vd = _self.valid_add(obj);
+        if (vd.ok) obj = vd.object;
+        else return callback(vd);
+
+        obj = _self.index_addnew(obj);
+
+        const p1 = new Promise(function (resolve, reject) {
+            client.set(obj.id, JSON.stringify(obj), function (err, res) {
+                resolve({ ok: err == null, id: obj.id, object: obj, message: err });
+            });
+        });
+        const p2 = new Promise(function (resolve, reject) {
+            const itnew = JSON.parse(JSON.stringify(obj));
+            itnew['api___'] = config.name;
+            itnew['db___'] = 'INSERT';
+
+            delete itnew['ix___'];
+            delete itnew['#ids'];
+            delete itnew['#utf8'];
+            delete itnew['#ascii'];
+            delete itnew['#org'];
+
+            db.set(obj.id, JSON.stringify(itnew), function (err, res) {
+                resolve({ ok: err == null, id: obj.id, object: obj, message: err });
+            });
+        });
+        Promise.all([p1, p2]).then(rsa => {
+            if (rsa[0].ok && rsa[0].ok) {
+                _self.items.push(obj);
+                return callback(rsa[0]);
+            }
+
+            if (rsa[0].ok) {
+                return callback(rsa[1]);
+            }
+
+            if (rsa[1].ok) {
+                return callback(rsa[0]);
+            }
+        });
+    };
+    this.update = function (obj, callback) {
+        const _self = this;
+        const config = _self.config;
+
+        if (client == null || config.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
+
+        if (obj == null || Array.isArray(obj) || typeof obj != 'object')
+            return callback({ ok: false, message: 'The format of obj must be { ... }' });
+
+        if (obj.id == null || _self.indexs[obj.id] == null)
+            return callback({ ok: false, message: 'Cannot find items has ID = ' + obj.id });
+
+        const it = _self.index_update(obj);
+
+        client.set(obj.id, JSON.stringify(it), function (err, res) {
+            if (callback) callback({ ok: err == null, id: obj.id, item: it, object: obj, message: err });
+        });
+    };
+    this.delete = function (key, callback) {
+        if (client == null || config.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
+
+        if (key == null) return callback({ ok: false, message: 'The key is null' });
+
+        client.del(key, function (err, res) {
+            if (callback) callback({ ok: err == null && res == 1, id: key, message: err });
+        });
+    };
+
+    this.valid_add = function (obj) {
+        const _self = this;
+        const config = _self.config;
+
+        try {
+
+            if (config.schema == null) return obj;
+
+            if (obj == null || typeof obj != 'object' || Array.isArray(obj) || Object.keys(obj).length == 0)
+                return { ok: false, message: 'Object must be not null or emtpy' };
+
+            const cols = Object.keys(obj);
+            const col_schema = Object.keys(config.schema);
+            //console.log('COLS = ', JSON.stringify(cols));
+            //console.log('COL_SCHEMA = ', JSON.stringify(col_schema));
+
+            //[1.1] Valid col is not exist into schema
+            const col_wrong = _.filter(cols, function (o_) { return col_schema.indexOf(o_) == -1; });
+            //console.log('ERR_COL_WRONG = ', JSON.stringify(col_wrong));
+            if (col_wrong.length > 0)
+                return { ok: false, message: col_wrong.join(', ') + ': field invalid' };
+
+
+            //[1.2] Valid set value is auto
+            const cf_auto = ['API', 'KEY_IDENTITY', 'yyyyMMdd', 'hhmmss', 'yyyyMMddhhmmss'];//
+            const col_auto = _.filter(_.map(config.schema
+                , function (val_, key_) { if (cf_auto.indexOf(val_) != -1 && key_ != 'id') return key_; else return null; })
+                , function (o_) { return o_ != null; });
+            const err_auto = _.filter(cols, function (o_) { return col_auto.indexOf(o_) != -1; });
+            //console.log('AUTO = ', JSON.stringify(col_auto));
+            //console.log('ERR_AUTO = ', JSON.stringify(err_auto));
+            if (err_auto.length > 0)
+                return { ok: false, message: err_auto.join(', ') + ': fields have values set auto as follow: ' + cf_auto.join(', ') };
+            else {
+                col_auto.forEach(col_ => {
+                    const val_ = config.schema[col_];
+                    switch (val_) {
+                        case 'API':
+                            const fn = config.name.toLowerCase() + '___' + col_.toLowerCase();
+                            if (_self.API[fn])
+                                obj[col_] = _self.API[fn]();
+                            break;
+                        //case 'KEY_IDENTITY':
+                        //    obj['id'] = _self.API.___guid_id(_self.API, config.id);
+                        //    break;
+                        case 'hhmmss':
+                            obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                            break;
+                        case 'yyyyMMdd':
+                            obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8));
+                            break;
+                        case 'yyyyMMddhhmmss':
+                            obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8) + '' + new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                            break;
+                    }
+                });
+            }
+
+
+            //[1.3] Valid set value is auto -1 or yyyyMMdd,hhmmss,yyyyMMddhhmmss
+            const cf_auto_null = ['-1|yyyyMMdd', '-1|hhmmss', '-1|yyyyMMddhhmmss'];
+            const col_auto_null = _.filter(_.map(config.schema
+                , function (val_, key_) { if (cf_auto_null.indexOf(val_) != -1) return key_; else return null; })
+                , function (o_) { return o_ != null; });
+            const err_auto_null = _.filter(cols, function (o_) { return col_auto_null.indexOf(o_) != -1; });
+            //console.log('AUTO_NULL = ', JSON.stringify(col_auto_null));
+            //console.log('ERR_AUTO_NULL = ', JSON.stringify(err_auto_null));
+            const err_auto_null_results = [];
+            col_auto_null.forEach(col_ => {
+                const v1 = config.schema[col_].substr(3);
+                const v2 = obj[col_];
+                if (v2 == null || v2 == -1 || v2 == '-1') {
+                    obj[col_] = -1;
+                } else if (v2 == 'hhmmss' || v2 == 'yyyyMMdd' || v2 == 'yyyyMMddhhmmss') {
+                    switch (v1) {
+                        case 'hhmmss':
+                            obj[col_] = Number(new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                            break;
+                        case 'yyyyMMdd':
+                            obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8));
+                            break;
+                        case 'yyyyMMddhhmmss':
+                            obj[col_] = Number(new Date().toISOString().slice(-24).replace(/\D/g, '').slice(0, 8) + '' + new Date().toTimeString().split(' ')[0].replace(/\D/g, ''));
+                            break;
+                    }
+                } else {
+                    err_auto_null_results.push(col_ + ' must be value is -1 or ' + v1);
+                }
+            });
+            if (err_auto_null_results.length > 0)
+                return { ok: false, message: err_auto_null_results.join(', ') };
+
+            //[2.1] Valid type data (not belong case 1.3)
+            const col_type_data = _.filter(cols, function (o_) { return o_ != 'id' && err_auto_null.indexOf(o_) == -1; });
+            //console.log('COL_TYPE_DATA = ', JSON.stringify(col_type_data));
+            const err_type_data = [];
+            col_type_data.forEach(col_ => {
+                const typ = typeof config.schema[col_];
+                if (typeof obj[col_] != typ)
+                    err_type_data.push(col_ + ' has type ' + typ + ' and value default is ' + config.schema[col_]);
+            });
+            if (err_type_data.length > 0)
+                return { ok: false, message: err_type_data.join(', ') };
+
+            //[3.1] Valid by config call API
+            if (config.valid_add) {
+                let cf_addon_valid = Object.keys(config.valid_add);
+                cf_addon_valid = _.filter(cf_addon_valid, function (o_) { return col_schema.indexOf(o_) != -1; });
+
+                const col_addon_miss = _.filter(cf_addon_valid, function (o_) { return cols.indexOf(o_) == -1; });
+                //console.log('COLS = ', JSON.stringify(cols));
+                //console.log('CF_API_VALID = ', JSON.stringify(cf_addon_valid));
+                //console.log('COL_API_MISS = ', JSON.stringify(col_addon_miss));
+
+                if (col_addon_miss.length > 0)
+                    return { ok: false, message: col_addon_miss.join(', ') + ' is missing' };
+
+                const cf_addon_valid_result = [];
+                for (var i = 0; i < cf_addon_valid.length; i++) {
+                    const col_ = cf_addon_valid[i];
+                    const fnv = config.valid_add[col_].name;
+                    const para = config.valid_add[col_].para;
+
+                    if (_self.API[fnv] == null)
+                        cf_addon_valid_result.push('Function ' + fnv + ' to valid field ' + col_ + ' is missing');
+                    else {
+                        const msg = _self.API[fnv](_self.API, col_, obj, para);
+                        if (msg != null && msg.length > 0)
+                            cf_addon_valid_result.push(msg);
+                    }
+                }
+
+                //console.log('CF_API_VALID_RESULT = ', JSON.stringify(cf_addon_valid_result));
+                if (cf_addon_valid_result.length > 0)
+                    return { ok: false, message: cf_addon_valid_result.join(', ') };
+            }
+
+            if (obj.id == null) return { ok: false, message: 'The field id is null' };
+
+            return { ok: true, object: obj };
+        } catch (e111) {
+            return { ok: false, object: obj, message: e111.message, err: e111 };
+        }
     };
 
     this.sync_db = (callback) => {
@@ -149,6 +522,10 @@
             if (rs_.ok) {
                 _self.busy = true;
                 try {
+                    const _DB_CONNECTION = require('tedious').Connection;
+                    const _DB_REQUEST = require('tedious').Request;
+                    const _DB_TYPES = require('tedious').TYPES;
+
                     const conn_str = config.sql_connect;
                     const sql_text = config.sql_select;
                     const select_top = config.select_top;
@@ -216,6 +593,9 @@
                             //console.log('????????? = ', o);
 
                             o.ix___ = _results.length;
+
+                            _self.indexs[o.id] = o;
+
                             _results.push(o);
                         });
 
@@ -231,7 +611,6 @@
             }
         });
     };
-
     this.sync_redis = function (callback) {
         const _self = this;
         const config = _self.config;

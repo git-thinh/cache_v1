@@ -1,6 +1,7 @@
 ﻿const { inspect } = require('util');
 const FS = require('fs');
 const _ = require('lodash');
+const URL = require('url');
 
 const ___SCOPE = 'MAIN';
 const ___CLEAN_LOG = true;
@@ -67,7 +68,7 @@ const api___init_file = (file) => {
 
                         return fc;
                     } catch (efc) {
-                        console.log('\n API: ', file, efc);
+                        console.log('\n API: ', file, efc.message);
                     }
                 }
             }
@@ -116,16 +117,14 @@ const app___init_cache = (configs, callback) => {
     let k = configs.length;
     for (var i = 0; i < configs.length; i++) {
         const cf = configs[i];
-
         const cache = new CACHE(cf);
-        cache.API = API;
-
         cache.start((_cache) => {
             k--;
-            //console.log(k, _cache.config.name);
             API.cache[_cache.config.name] = _cache;
+            if (_cache) _cache.API = API;
+            console.log(_cache.config.name + ' = ', _cache != null);
             if (k == 0) {
-                //console.log('CACHE START ok ...');
+                console.log('-> CACHE_START OK ...');
                 callback();
             }
         });
@@ -172,9 +171,8 @@ const app___start = () => {
 const app___start_callback = (ok) => {
     const LOG_KEY = 'START';
     if (!ok) return;
-    console.log('START = ', ok);
+    console.log('-> APP_START = ', ok);
     ___log_key(LOG_KEY, 'start success = ' + ok);
-
 };
 
 //#endregion
