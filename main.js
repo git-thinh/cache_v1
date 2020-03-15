@@ -107,19 +107,29 @@ const api___reset_all = (callback) => {
 
 //#region [ APP START, INIT CACHE ]
 
+const CACHE = require('./im_cache.js');
+
 const app___init_cache = (configs, callback) => {
 
     if (configs.length == 0) return callback();
 
-    const caches = [];
-    configs.forEach(cf => {
-        API.cache[cf.name] = require('./im_cache.js');
-        API.cache[cf.name].API = API;
-        const p = API.cache[cf.name].init(cf);
-        caches.push(p);
-    });
+    let k = configs.length;
+    for (var i = 0; i < configs.length; i++) {
+        const cf = configs[i];
 
-    Promise.all(caches).then(rs => { callback(); }); 
+        const cache = new CACHE(cf);
+        cache.API = API;
+
+        cache.start((_cache) => {
+            k--;
+            //console.log(k, _cache.config.name);
+            API.cache[_cache.config.name] = _cache;
+            if (k == 0) {
+                //console.log('CACHE START ok ...');
+                callback();
+            }
+        });
+    }
 };
 
 const app___start = () => {
@@ -208,7 +218,7 @@ RL.on("line", function (line) {
             break;
         case 'config':
             console.clear();
-            if (has_pushLog)                
+            if (has_pushLog)
                 ___log_key(cmd, API.config);
             else
                 console.log(inspect(API.config));
@@ -242,7 +252,21 @@ RL.on("line", function (line) {
             break;
         case 'cache.load_db':
             console.clear();
-
+            if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
+                const cache = API.cache[a[1].toUpperCase()];
+                cache.load_db(m => {
+                    console.log(m);
+                });
+            }
+            break;
+        case 'cache.config':
+            console.clear();
+            if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
+                const cache = API.cache[a[1].toUpperCase()];
+                cache.get_config(m => {
+                    console.log(m);
+                });
+            }
             break;
         case 'cache.load_redis':
             console.clear();

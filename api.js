@@ -421,9 +421,11 @@
     };
 };
 
-api.instance = null;
-api.getInstance = function () {
-    if (this.instance === null) this.instance = new api();
-    return this.instance;
-};
-module.exports = api.getInstance();
+//api.instance = null;
+//api.getInstance = function () {
+//    if (this.instance === null) this.instance = new api();
+//    return this.instance;
+//};
+//module.exports = api.getInstance();
+
+module.exports = new api();
