@@ -1,4 +1,4 @@
-﻿function(api, req, res) {
+﻿function(api, req, res, config) {
     const LOG_KEY = 'api_test';
     if (api == null || req == null || res == null) return null;
 

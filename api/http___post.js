@@ -1,4 +1,4 @@
-﻿function(api, req, res) {
+﻿function(api, req, res, config) {
     if (api == null || req == null || res == null) return null;
 
     const data = req.body;

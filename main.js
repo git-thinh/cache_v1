@@ -51,8 +51,8 @@ const api___init_file = (file) => {
                             fc = new Function('api', 'obj', js);
                             fc(API, null);
                         } else if (f.startsWith('http___')) {
-                            fc = new Function('api', 'req', 'res', js);
-                            fc(API, null, null);
+                            fc = new Function('api', 'req', 'res', 'config', js);
+                            fc(API, null, null, null);
                         } else if (f.startsWith('valid___')) {
                             fc = new Function('api', 'col', 'obj', 'val', js);
                             fc(API, null, null, null);
@@ -250,11 +250,20 @@ RL.on("line", function (line) {
             else
                 console.log(_.sortBy(Object.keys(API.cache)));
             break;
-        case 'cache.load_db':
+        case 'cache.sync_db':
             console.clear();
             if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
                 const cache = API.cache[a[1].toUpperCase()];
-                cache.load_db(m => {
+                cache.sync_db(m => {
+                    console.log(m);
+                });
+            }
+            break;
+        case 'cache.sync_redis':
+            console.clear();
+            if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
+                const cache = API.cache[a[1].toUpperCase()];
+                cache.sync_redis(m => {
                     console.log(m);
                 });
             }
@@ -263,14 +272,8 @@ RL.on("line", function (line) {
             console.clear();
             if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
                 const cache = API.cache[a[1].toUpperCase()];
-                cache.get_config(m => {
-                    console.log(m);
-                });
+                console.log(cache.get_config);
             }
-            break;
-        case 'cache.load_redis':
-            console.clear();
-
             break;
         case 'bgsave':
             console.clear();
@@ -280,6 +283,15 @@ RL.on("line", function (line) {
             });
             break;
         default:
+            API.cache['USER'].sync_db(r1 => {
+                console.log(r1);
+                if (r1.ok) {
+                    API.cache['USER'].sync_redis(r2 => {
+                        console.log(r2); 
+                    });
+                }
+            });
+
             //console.log('\n', API['PAWN'].valid_add({
             //    //id: 123,
             //    //int_status: 1,
