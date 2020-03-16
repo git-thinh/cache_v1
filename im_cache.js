@@ -29,6 +29,9 @@
     this.ready = false;
     this.busy = false;
 
+    this.get_client = () => { return client; }
+    this.get_db_sync = () => { return db; }
+
     this.___convert_unicode_to_ascii = function (str) {
         if (str == null || str.length == 0) return '';
         try {
@@ -363,7 +366,9 @@
             delete itnew['#ascii'];
             delete itnew['#org'];
 
-            db.set(obj.id, JSON.stringify(itnew), function (err, res) {
+            const id = _self.config.id + '.' + obj.id;
+
+            db.set(id, JSON.stringify(itnew), function (err, res) {
                 resolve({ ok: err == null, id: obj.id, object: obj, message: err });
             });
         });

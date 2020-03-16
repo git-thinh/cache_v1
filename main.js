@@ -48,12 +48,18 @@ const api___init_file = (file) => {
                     js = s.substr(pos, s.length - pos - 1).trim();
                     try {
                         let fc;
+                        let api_name = f.substr(0, f.length - 3).trim();
+
                         if (f.startsWith('___')) {
                             fc = new Function('api', 'obj', js);
                             fc(API, null);
                         } else if (f.startsWith('http___')) {
                             fc = new Function('api', 'req', 'res', 'config', 'body', js);
                             fc(API, null, null, null, null);
+                        } else if (f.startsWith('api___')) {
+                            fc = new Function('api', 'req', 'res', 'config', 'body', js);
+                            fc(API, null, null, null, null);
+                            api_name = api_name.substr(6);
                         } else if (f.startsWith('valid___')) {
                             fc = new Function('api', 'col', 'obj', 'val', js);
                             fc(API, null, null, null);
@@ -61,14 +67,13 @@ const api___init_file = (file) => {
                             fc = new Function('api', 'obj', js);
                             fc(API, null);
                         }
-                        console.log('-> API: ', file, ' done');
+                        console.log('-> API: ' + api_name + ' done');
 
-                        if (fc)
-                            API[f.substr(0, f.length - 3).trim()] = fc;
+                        if (fc) API[api_name] = fc;
 
                         return fc;
                     } catch (efc) {
-                        console.log('\n API: ', file, efc.message);
+                        console.log('\n-> ERR: ', file, efc.message, '\n');
                     }
                 }
             }
