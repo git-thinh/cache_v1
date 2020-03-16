@@ -711,8 +711,12 @@
     };
     this.destroy = function () {
         const _self = this;
-        _self.ram_clear();
-        if (client) client.quit();
-        if (db) db.quit();
+        try {
+            _self.ram_clear();
+            if (client) client.quit();
+            if (db) db.quit();
+        } catch (e) {
+            console.log('err_destroy', e);
+        }
     };
 };
