@@ -149,34 +149,41 @@
 
         Promise.all([p1, p2]).then(rsa => {
             const it = rsa[0] && rsa[1] ? _self : null;
-            callback(it);
+            let callBacked = false;
+            if (it) {
+                switch (config.cmd_install) {
+                    case 'LOAD_FROM_REDIS':
+                        _self.redis_get_keys(keys_ => {
+                            if (keys_.length > 0) {
+                                _self.ram_clear();
+                                let keys_k = keys_.length;
+                                for (var i = 0; i < keys_.length; i++) {
+                                    const key_ = keys_[i];
+                                    client.get(key_, function (err3, val_) {
+                                        keys_k--;
+                                        if (err3) {
+                                            console.log('LOAD_FROM_REDIS.' + config.name + '.' + key_, err3);
+                                        } else {
+                                            //console.log(keys_k, key_);
+                                            let o_ = JSON.parse(val_);
+                                            o_ = _self.index_addnew(o_);
+                                            //console.log(keys_k, o_.id);
+                                            _self.items.push(o_);
+                                        }
+                                        if (keys_k == 0) {
+                                            console.log('LOAD_FROM_REDIS done ...');
+                                            callback(_self);
+                                        }
+                                    });
+                                }
+                                callBacked = true;
+                            }
+                        });
+                        break;
+                }
+            }
+            if (callBacked == false) callback(it);
         });
-
-        ////client = redis.createClient({ port: config.port });
-        ////client.on("error", function (error) {
-        ////    if (_self.ready) {
-        ////        _self.ready = false;
-        ////        _self.message = error.message;
-        ////        console.log('API_' + config.name + ':', error);
-        ////    } else if (_self.message != error.message) {
-        ////        console.log('API_' + config.name + ':', error);
-        ////        _self.message = error.message;
-        ////        return callback(_self);
-        ////    }
-        ////});
-        ////client.on("end", function (error) {
-        ////    _self.ready = false;
-        ////    console.log('API_' + config.name + ': \t-> end');
-        ////});
-        ////client.on("ready", function (error) {
-        ////    _self.ready = true;
-        ////    _self.ok = true;
-        ////    return callback(_self);
-        ////});
-        ////client.on("connect", function (error) {
-        ////    _self.ready = true;
-        ////    //console.log('API_' + config.name + ': \t-> connect');
-        ////});
     };
     this.get_config = () => {
         const _self = this;
@@ -208,29 +215,77 @@
         });
     };
 
-    this.search = (fn, page_size) => {
+    this.search_by_config = (cf) => {
         const _self = this;
-        if (fn == null || typeof fn != 'function') return { ok: false };
+
+        let page_size;
+        if (cf.page_size) page_size = cf.page_size;
+        else page_size = _self.API.page_size;
+        if (page_size == null) page_size = 0;
+        if (page_size == 0) return { ok: false, code: 'CONFIG_PAGE_SIZE', message: 'Please config page_size > 0' };
+
+        let page_number;
+        if (cf.page_number) page_number = cf.page_number;
+        else page_number = 1;
+
+        let fn_map, fn_conditions;
+        if (cf && typeof cf.fn_map != 'function') fn_map = cf.fn_map;
+        if (cf && typeof cf.fn_conditions != 'function') fn_conditions = cf.fn_conditions;
 
         const total = _self.items.length;
-        const ids = [], its = [];
+        const ids = [], items = [];
+        const no_filter = fn_conditions == null;
+
+        let min = 0, max = page_size;
+        if (page_number > 1) {
+            min = (page_number - 1) * page_size;
+            max = page_number * page_size;
+        }
+
         for (var i = 0; i < total; i++) {
-            if (fn(_self.items[i])) {
-                ids.push(_self.items[i].id);
-                if (ids.length <= page_size) its.push(_self.items[i]);
+            let o = _self.items[i];
+            try {
+                if (no_filter) {
+                    ids.push(o.id);
+                    if (ids.length >= min && ids.length < max) {
+                        if (fn_map) items.push(fn_map(o));
+                        else items.push(o);
+                    }
+                } else if (fn_conditions(o)) {
+                    ids.push(o.id);
+                    if (ids.length >= min && ids.length < max) {
+                        if (fn_map) items.push(fn_map(o));
+                        else items.push(o);
+                    }
+                }
+            } catch (e1) {
+                return { ok: false, code: 'ERR_THROW.SEARCH_BY_CONFIG', message: e1.message, err: e1 };
             }
         }
-        return { ok: true, total: total, page_size: page_size, ids: ids, data: its };
+        return { ok: true, total: total, page_size: page_size, ids: ids, data: items };
     };
-    this.get_ids = (ids) => {
+    this.get_by_ids = (ids, fn_map) => {
         const _self = this;
         if (ids == null || Array.isArray(ids) == false || ids.length == 0) return [];
-        const a = _.map(ids, function (o_) { return _self.indexs[o_]; });
-        return a;
+        let a = [];
+        try {
+            a = _.map(ids, function (o_) { return fn_map == null ? _self.indexs[o_] : fn_map(_self.indexs[o_]); });
+        } catch (e1) {
+            return { ok: false, message: e1.message, err: e1, data: [] }
+        }
+        return { ok: true, data: a };
     };
-    this.get_all = () => {
+    this.get_all = (fn_map) => {
         const _self = this;
-        return _self.items;
+        if (fn_map == null) return { ok: true, data: _self.items };
+
+        let a = [];
+        try {
+            a = _.map(_self.items, fn_map);
+        } catch (e1) {
+            return { ok: false, message: e1.message, err: e1, data: [] }
+        }
+        return { ok: true, data: a };
     };
 
     this.index_update = function (o) {
@@ -242,7 +297,7 @@
 
             const ids = [], utf8 = [];
             for (var c in it) {
-                if (it[c] != null || it[c] != -1) {
+                if (it[c] != null && it[c] != -1 && c[0] != '#' && c != 'ix___') {
                     if (typeof it[c] == 'number') ids.push(it[c]);
                     else utf8.push(it[c]);
                 }
@@ -263,7 +318,7 @@
 
         const ids = [], utf8 = [];
         for (var c in o) {
-            if (o[c] != null || o[c] != -1) {
+            if (o[c] != null && o[c] != -1 && c[0] != '#' && c != 'ix___') {
                 if (typeof o[c] == 'number') ids.push(o[c]);
                 else utf8.push(o[c]);
             }
@@ -630,5 +685,32 @@
         client.multi(cmds).exec(function (err, replies_) {
             if (callback) callback({ ok: err == null, replies: replies_, ids: ids, message: err });
         });
+    };
+
+    this.redis_get_count = function (callback) {
+        const _self = this;
+        const config = _self.config;
+
+        if (client == null || config.ready == false) return callback(0);
+        client.keys('*', function (err, keys) {
+            if (err) return callback(0);
+            callback(keys.length);
+        });
+    };
+    this.redis_get_keys = function (callback) {
+        const _self = this;
+        const config = _self.config;
+
+        if (client == null || config.ready == false) return callback([]);
+        client.keys('*', function (err, keys) {
+            if (err) return callback([]);
+            callback(keys);
+        });
+    };
+
+    this.ram_clear = function () {
+        const _self = this;
+        _self.items = [];
+        _self.indexs = {};
     };
 };

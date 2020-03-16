@@ -25,8 +25,8 @@
             return next();
         });
 
-        HTTP_APP.get('/', (req, res) => _self.API.http___(_self.API, req, res, {}));
-        HTTP_APP.post('/', (req, res) => _self.API.http___(_self.API, req, res, {}));
+        HTTP_APP.get('/', (req, res) => _self.API.http___(_self.API, req, res, {}, req.body));
+        HTTP_APP.post('/', (req, res) => _self.API.http___(_self.API, req, res, {}, req.body));
 
         HTTP_SERVER.listen(config.port, config.ip, callback);
     };

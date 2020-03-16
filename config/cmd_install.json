@@ -1,7 +1,7 @@
 {
-  "": "RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL",
+  "": "RESET_FROM_DB | FIRST_FROM_DB | DELETE_ALL | LOAD_FROM_REDIS",
   "LOG": "",
-  "USER": "",
+  "USER": "LOAD_FROM_REDIS",
   "SHOP": "",
   "GROUP": "",
   "SYS_SMS": "",

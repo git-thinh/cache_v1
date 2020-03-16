@@ -1,4 +1,4 @@
-﻿function(api, req, res, config) {
+﻿function(api, req, res, config, body) {
     if (api == null || req == null || res == null || config == null) return null;
     const api_name = config.cache;
     const LOG_KEY = api_name + '_' + config.action;
@@ -6,9 +6,7 @@
     if (api.cache[api_name] == null)
         return res.json({ ok: false, request: request, time: new Date().toLocaleString(), message: 'Cannot find cache ' + config.cache });
 
-    const data = req.body;
-    if (data == null) return res.json({ ok: false, message: 'Data bosy is null' });
-    request.body = data;
+    if (body == null || Object.keys(body).length == 0) return res.json({ ok: false, message: 'Data body is null' });
 
     api.___log_key(LOG_KEY, request);
 
@@ -16,7 +14,7 @@
 
     let m = { ok: false, message: '', request: request };
     try {
-        api.cache[api_name].addnew(data, function (m_){
+        api.cache[api_name].addnew(body, function (m_) {
             m_.request = request;
             res.json(m_);
         });
