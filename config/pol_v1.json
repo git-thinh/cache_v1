@@ -18,7 +18,7 @@
     "scope": "pos",
     "name": "SHOP",
     "port": 10002,
-    "enable": true
+    "enable": false
   },
   {
     "id": 13,

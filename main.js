@@ -9,7 +9,7 @@ const API = { page_size: 15, config: null, busy: false, message: '', busy_func: 
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');
-const HTTP_PORT = 12345;
+const HTTP_PORT = 123;
 
 //#region [ LOG ]
 
@@ -119,17 +119,35 @@ const app___init_cache = (configs, callback) => {
 
     if (configs.length == 0) return callback();
 
-    let k = configs.length;
-    for (var i = 0; i < configs.length; i++) {
-        const cf = configs[i];
+    const frees = _.filter(configs, function (o_) { return o_.enable != null && o_.enable == false; });
+    frees.forEach(cf => {
+        if (API.cache[cf.name] && API.cache[cf.name].destroy)
+            API.cache[cf.name].destroy();
+        delete API.cache[cf.name];
+    });
+
+    const a = _.filter(configs, function (o_) { return o_.enable != null && o_.enable == true; });
+    if (a.length == 0) return callback();
+
+    let k = a.length;
+    for (var i = 0; i < a.length; i++) {
+        const cf = a[i];
         const cache = new CACHE(cf);
         cache.start((_cache) => {
             k--;
-            API.cache[_cache.config.name] = _cache;
-            if (_cache) _cache.API = API;
-            console.log(_cache.config.name + ' = ', _cache != null);
+            if (_cache == null) {
+                console.log('-> Cache ' + cache.config.name + ' start = ', false);
+            } else {
+
+                if (API.cache[_cache.config.name] && API.cache[_cache.config.name].destroy)
+                    API.cache[_cache.config.name].destroy();
+
+                API.cache[_cache.config.name] = _cache;
+                _cache.API = API;
+                console.log('-> Cache ' + _cache.config.name + ' start = ', true);
+            }
             if (k == 0) {
-                console.log('-> CACHE_START OK ...');
+                console.log('\n-> CACHE_START OK ...\n');
                 callback();
             }
         });
@@ -181,7 +199,28 @@ const app___start_callback = (ok) => {
 };
 
 const app___cache_reset = (cache_name, callback) => {
+    if (cache_name == null || cache_name.length == 0) return callback();
 
+    API.busy = true;
+    API.message = 'All cache reseting';
+
+    for (var c in API.cache) if (c == cache_name) API.cache[c].destroy();
+
+    im_config.get().then(cfs => {
+        const cf = _.find(cfs, function (o_) { return o_.name == cache_name; }); 
+        if (cf) {
+            const pos = _.findIndex(API.config, function (o_) { return o_.name == cache_name; });
+            if (pos != -1) {
+                API.config[pos] = cf;
+                console.log('Load config done ...');
+                app___init_cache([cf], () => {
+                    API.busy = false;
+                    API.message = '';
+                    if (callback) callback();
+                });
+            } else callback();
+        } else callback();
+    });
 };
 const app___cache_reset_all = (callback) => {
     API.busy = true;
@@ -192,8 +231,11 @@ const app___cache_reset_all = (callback) => {
     im_config.get().then(cfs => {
         API.config = cfs;
         console.log('Load config done ...');
-        ___log_key(LOG_KEY, 'load config', cfs);
-        resolve({ ok: true, data: cfs });
+        app___init_cache(cfs, () => {
+            API.busy = false;
+            API.message = '';
+            if (callback) callback();
+        });
     });
 };
 
@@ -213,23 +255,32 @@ RL.on("line", function (line) {
         case 'exit':
             process.exit();
             break;
+        case '?':
+        case '-':
+        case '--':
+        case '-h':
+        case '--h':
         case '-help':
         case '--help':
             console.clear();
             const helps = [
-                '- ?log = push to redis log at port 11111 on key MAIN.???',
+                '- ?log = push to redis log at port 11111 on key MAIN.???  \n\n',
 
-                '- cls|clear|clean = Clean terminal console.log',
+                '- cls|clear|clean = Clean terminal console.log \n\n',
 
-                '- config = Display config',
+                '- config = Display all config \n\n',
 
                 '- api.key = Display keys of object API',
-                '- api.reload (|file_api.js) = Reload all script | reload only a file_api.js',
+                '- api.reset (|file_api.js) = Reload all script | reload only a file_api.js \n\n',
 
-                '- cache.reload = Reset cache engine (all | by cache_name)',
+                '- cache.reset = Reset cache engine (all | by cache_name)',
                 '- cache.key = Display keys of Cache Engine',
-                '- cache.load_db KEY = Load DB into cache engin by KEY',
-                '- cache.load_redis = Load Redis into cache engin by KEY',
+                '- cache.sync_db KEY = Load DB into cache engin by KEY',
+                '- cache.sync_redis KEY = Load Redis into cache engin by KEY \n\n',
+
+                '- cache.config = Get config of cache',
+                '- cache.stop = Change flag STOP = !STOP',
+                '- cache.busy = Change flag BUSY = !BUSY \n\n'
             ];
             console.log('Help input command:\n\t', helps.join('\n\t'));
             break;
@@ -251,7 +302,7 @@ RL.on("line", function (line) {
             else
                 console.log(_.sortBy(Object.keys(API)));
             break;
-        case 'api.reload':
+        case 'api.reset':
             console.clear();
             if (a.length > 1) {
                 const file = a[1].toLowerCase();
@@ -264,7 +315,7 @@ RL.on("line", function (line) {
                 });
             }
             break;
-        case 'cache.reload':
+        case 'cache.reset':
             console.clear();
             if (a.length > 1) {
                 const cache_name = a[1].trim().toUpperCase();
@@ -307,25 +358,35 @@ RL.on("line", function (line) {
             console.clear();
             if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
                 const cache = API.cache[a[1].toUpperCase()];
-                console.log(cache.get_config);
+                console.log(cache.get_config());
             }
             break;
-        case 'bgsave':
+        case 'cache.busy':
             console.clear();
-            API['USER'].send_command('BGSAVE', function (err, reply) {
-                console.log(err);
-                console.log(reply);
-            });
+            if (a.length > 1 && API.cache[a[1].toUpperCase()]) {
+                const cache = API.cache[a[1].toUpperCase()];
+                cache.busy = cache.busy ? false : true;
+                console.log(cache.busy);
+            }
             break;
+        //case 'bgsave':
+        //    console.clear();
+        //    API['USER'].send_command('BGSAVE', function (err, reply) {
+        //        console.log(err);
+        //        console.log(reply);
+        //    });
+        //    break;
         default:
-            API.cache['USER'].sync_db(r1 => {
-                console.log(r1);
-                if (r1.ok) {
-                    API.cache['USER'].sync_redis(r2 => {
-                        console.log(r2);
-                    });
-                }
-            });
+            console.clear();
+
+            //API.cache['USER'].sync_db(r1 => {
+            //    console.log(r1);
+            //    if (r1.ok) {
+            //        API.cache['USER'].sync_redis(r2 => {
+            //            console.log(r2);
+            //        });
+            //    }
+            //});
 
             //console.log('\n', API['PAWN'].valid_add({
             //    //id: 123,

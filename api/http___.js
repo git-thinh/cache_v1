@@ -4,7 +4,7 @@
     if (api.busy) {
         let s = api.message;
         if (s == null || s.length == 0) s = 'System cache is locked for improment, Please try again';
-        res.json({ ok: false, message: s, time: new Date().toLocaleString() });
+        res.json({ ok: false, code: 'HTTP___', message: s, time: new Date().toLocaleString() });
         return;
     }
 
@@ -16,7 +16,27 @@
 
     if (str_api == null || str_api.length == 0 ||
         str_action == null || str_action.length == 0) {
-        res.json({ ok: false, message: 'URI must be format is /?api=...&action=...', time: new Date().toLocaleString() });
+        res.json({ ok: false, code: 'HTTP___', message: 'URI must be format is /?api=...&action=...' });
+        return;
+    }
+
+    if (api.cache && api.cache[str_api] == null) {
+        res.json({ ok: false, code: 'HTTP___', message: 'Cache engine not exist ' + str_api });
+        return;
+    }
+
+    if (api.cache[str_api].stop) {
+        res.json({ ok: false, code: 'HTTP___', message: 'Cache engine ' + str_api + ' is stop' });
+        return;
+    }
+
+    if (api.cache[str_api].busy) {
+        res.json({ ok: false, code: 'HTTP___', message: 'Cache engine ' + str_api + ' is busy' });
+        return;
+    }
+
+    if (api.cache[str_api].ready == false) {
+        res.json({ ok: false, code: 'HTTP___', message: 'Cache engine ' + str_api + ' is not ready' });
         return;
     }
 
@@ -59,13 +79,13 @@
             fn_conditions({});
         } catch (e1) {
             fn_conditions = null;
-            res.json({ ok: false, code: 'ERR_CREATE_FN_CONDITIONS', message: e1.message, err: e1 });
+            res.json({ ok: false, code: 'HTTP___.ERR_CREATE_FN_CONDITIONS', message: e1.message, err: e1 });
             return;
         }
     }
 
     //#endregion
-       
+
     let fn_map;
     //#region [ FN_MAP ]
 
@@ -82,7 +102,7 @@
             fn_map({});
         } catch (e1) {
             fn_map = null;
-            res.json({ ok: false, code: 'ERR_CREATE_FN_MAP', message: e1.message, err: e1 });
+            res.json({ ok: false, code: 'HTTP___.ERR_CREATE_FN_MAP', message: e1.message, err: e1 });
             return;
         }
     }
@@ -102,7 +122,7 @@
         if (v_page_number.length > 0) {
             const n_page_number = Number(v_page_number);
             if (isNaN(n_page_number) || n_page_number < 1) {
-                res.json({ ok: false, code: 'ERR_CONFIG_PAGE_NUMBER', message: 'Config page_number must be > 0' });
+                res.json({ ok: false, code: 'HTTP___.ERR_CONFIG_PAGE_NUMBER', message: 'Config page_number must be > 0' });
                 return;
             } else {
                 page_number = n_page_number;
@@ -127,7 +147,7 @@
         if (v_page_size.length > 0) {
             const n_page_size = Number(v_page_size);
             if (isNaN(n_page_size) || n_page_size < 1) {
-                res.json({ ok: false, code: 'ERR_CONFIG_PAGE_NUMBER', message: 'Config page_size must be > 0' });
+                res.json({ ok: false, code: 'HTTP___.ERR_CONFIG_PAGE_NUMBER', message: 'Config page_size must be > 0' });
                 return;
             } else if (n_page_size > 0) {
                 //console.log('n_page_size === ', n_page_size);
@@ -154,10 +174,10 @@
     if (api[func] == null && api['http___cache_' + str_action]) func = 'http___cache_' + str_action;
 
     if (api[func] == null)
-        return res.json({ ok: false, message: 'Cannot find API: ' + func + ', http___cache_' + str_action, time: new Date().toLocaleString() });
+        return res.json({ ok: false, code: 'HTTP___', message: 'Cannot find API: ' + func + ', http___cache_' + str_action });
     try {
         api[func](api, req, res, config_, body);
     } catch (err) {
-        return res.json({ ok: false, message: 'ERROR_EXECUTE_API: ' + err.message, time: new Date().toLocaleString() });
+        return res.json({ ok: false, code: 'HTTP___', message: 'ERROR_EXECUTE_API: ' + err.message, time: new Date().toLocaleString() });
     }
 }

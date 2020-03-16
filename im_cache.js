@@ -28,6 +28,7 @@
     this.message = '';
     this.ready = false;
     this.busy = false;
+    this.stop = false;
 
     this.get_client = () => { return client; };
     this.get_db_sync = () => { return db; };
@@ -152,10 +153,24 @@
 
         Promise.all([p1, p2]).then(rsa => {
             const it = rsa[0] && rsa[1] ? _self : null;
-            let callBacked = false;
+            let isBreak = false;
             if (it) {
                 switch (config.cmd_install) {
+                    case 'RESET_FROM_DB':
+                        _self.sync_db((m2) => {
+                            if (m2.ok) {
+                                _self.sync_redis(m3 => {
+                                    if (m3.ok) {
+                                        callback(_self);
+                                        isBreak = true;
+                                    }
+                                });
+                            }
+                        });
+                        break;
                     case 'LOAD_FROM_REDIS':
+                    default:
+                        // LOAD_FROM_REDIS
                         _self.redis_get_keys(keys_ => {
                             if (keys_.length > 0) {
                                 _self.ram_clear();
@@ -179,13 +194,13 @@
                                         }
                                     });
                                 }
-                                callBacked = true;
+                                isBreak = true;
                             }
                         });
                         break;
                 }
             }
-            if (callBacked == false) callback(it);
+            if (isBreak == false) callback(null);
         });
     };
     this.get_config = () => {
@@ -210,8 +225,7 @@
 
         _self.busy = true;
         client.flushall('ASYNC', function (err) {
-            _self.items = [];
-            _self.indexs = {};
+            _self.ram_clear();
             _self.busy = false;
             console.log(config.name, ' -> DELETE_ALL: OK');
             callback({ ok: err == null, message: err });
@@ -586,10 +600,12 @@
                     if (select_top && select_top.length > 0)
                         script = 'select top ' + select_top + ' ' + script.substr(6, script.length - 6);
 
+                    //console.log(script);
+
                     const _results = [];
                     _DB_CONN.on('connect', function (err) {
                         if (err) {
-                            console.log(err);
+                            console.log('DB_CONNECT_ERR: ', err.message);
                             _self.busy = false;
                             return callback({ ok: false, message: err });
                         }
@@ -597,6 +613,10 @@
                         console.log(config.name + ' reading db ...');
 
                         const request = new _DB_REQUEST(script, function (err_, count_, rows_) {
+                            if (err_) {
+                                console.log('DB_REQUEST -> ERR: ', err_.message);
+                                return callback({ ok: false, message: err_.message, err: err_ });
+                            }
                             console.log(config.name + ' ok = ' + _results.length);
                             _DB_CONN.close();
                             _self.items = _results;
@@ -652,7 +672,6 @@
 
                         _DB_CONN.execSql(request);
                     });
-
                 } catch (e1) {
                     _self.busy = false;
                     return callback({ ok: false, message: e1.message });
@@ -666,7 +685,7 @@
         const _self = this;
         const config = _self.config;
 
-        if (client == null || config.ready == false)
+        if (client == null || _self.ready == false)
             return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
 
         if (_self.items.length == 0) return callback({ ok: true });
@@ -712,6 +731,7 @@
     this.destroy = function () {
         const _self = this;
         try {
+            _self.stop = true;
             _self.ram_clear();
             if (client) client.quit();
             if (db) db.quit();

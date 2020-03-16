@@ -6,16 +6,20 @@
             let file, pol_v1, cmd_install, select_top, sql_connect;
 
             file = './config/cmd_install.json';
-            if (FS.existsSync(file)) try { cmd_install = require(file); } catch (e) { ; }
+            //if (FS.existsSync(file)) try { cmd_install = require(file); } catch (e) { ; }
+            if (FS.existsSync(file)) try { cmd_install = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
 
             file = './config/pol_v1.json';
-            if (FS.existsSync(file)) try { pol_v1 = require(file); } catch (e) { ; }
+            //if (FS.existsSync(file)) try { pol_v1 = require(file); } catch (e) { ; }
+            if (FS.existsSync(file)) try { pol_v1 = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
 
             file = './config/select_top.json';
-            if (FS.existsSync(file)) try { select_top = require(file); } catch (e) { ; }
+            //if (FS.existsSync(file)) try { select_top = require(file); } catch (e) { ; }
+            if (FS.existsSync(file)) try { select_top = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
 
             file = './config/sql_connect.json';
-            if (FS.existsSync(file)) try { sql_connect = require(file); } catch (e) { ; }
+            //if (FS.existsSync(file)) try { sql_connect = require(file); } catch (e) { ; }
+            if (FS.existsSync(file)) try { sql_connect = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
 
             //console.log('cmd_install = ', cmd_install);
             //console.log('select_top = ', select_top);
@@ -28,6 +32,7 @@
 
                     cf.select_top = '';
                     if (select_top && select_top[cf.name]) cf.select_top = select_top[cf.name];
+                    //console.log(cf.name, '.select_top = ', cf.select_top);
 
                     cf.sql_connect = null;
                     if (sql_connect && sql_connect[cf.scope]) cf.sql_connect = sql_connect[cf.scope];
@@ -38,11 +43,13 @@
 
                     file = './config/schema/' + cf.name + '.json';
                     cf.schema = null;
-                    if (FS.existsSync(file)) try { cf.schema = require(file); } catch (e) { ; }
+                    //if (FS.existsSync(file)) try { cf.schema = require(file); } catch (e) { ; }
+                    if (FS.existsSync(file)) try { cf.schema = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
 
                     file = './config/valid_add/' + cf.name + '.json';
                     cf.valid_add = null;
-                    if (FS.existsSync(file)) try { cf.valid_add = require(file); } catch (e) { ; }
+                    //if (FS.existsSync(file)) try { cf.valid_add = require(file); } catch (e) { ; }
+                    if (FS.existsSync(file)) try { cf.valid_add = JSON.parse(FS.readFileSync(file).toString('utf8')); } catch (e) { ; }
                 });
 
                 //console.log('pol_v1 = ', pol_v1[pol_v1.length - 1]);
