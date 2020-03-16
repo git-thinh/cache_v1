@@ -124,5 +124,12 @@
     "name": "PAWN",
     "port": 10013,
     "enable": false
+  },
+  {
+    "id": 28,
+    "scope": "pos",
+    "name": "SYS_CONFIG",
+    "port": 10019,
+    "enable": true
   }
 ]

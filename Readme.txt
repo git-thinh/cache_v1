@@ -35,7 +35,7 @@ c:\pol_customer_10015\redis-server.exe --service-install --service-name pol_cust
 c:\pol_channel_10016\redis-server.exe --service-install --service-name pol_channel_10016 --port 10016
 c:\pol_asset_type_10017\redis-server.exe --service-install --service-name pol_asset_type_10017 --port 10017
 c:\pol_area_10018\redis-server.exe --service-install --service-name pol_area_10018 --port 10018
-
+c:\pos_sys_config_10019\redis-server.exe --service-install --service-name pos_sys_config_10019 --port 10019
 
 .\redis-server.exe --service-install --service-name pol_log --port 10000
 sc delete pol_log
