@@ -30,9 +30,9 @@
             user_.user_id = user_.id;
             user_.ref_id = user_.id;
             user_.scope_ids = 'pol';
-
-
+                       
             let user = JSON.parse(JSON.stringify(user_));
+            user.ok = true;
             delete user['str_password'];
 
             let cf = {}, acf = (___cache['SYS_CONFIG'] == null ? [] : ___cache['SYS_CONFIG'].items);
@@ -82,7 +82,8 @@
     } catch (e1) {
         m.message = e1.message;
     }
-    return res.json(m);
+
+    res.json(m);
 
     //res.json({ ok: true, time: new Date().toLocaleString() });
     //res.json({ data: Object.keys(api.cache) });

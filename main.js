@@ -5,7 +5,7 @@ const URL = require('url');
 
 const ___SCOPE = 'MAIN';
 const ___CLEAN_LOG = true;
-const API = { page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
+const API = { _: _, fs: FS, page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');

@@ -282,7 +282,7 @@
                 return { ok: false, code: 'ERR_THROW.SEARCH_BY_CONFIG', message: e1.message, err: e1 };
             }
         }
-        return { ok: true, total: total, ids: ids, data: items };
+        return { ok: true, total: total, count: ids.length, data: items, ids: ids };
     };
     this.get_by_ids = (ids, fn_map) => {
         const _self = this;
@@ -295,6 +295,14 @@
         }
         return { ok: true, data: a };
     };
+    this.get_by_id = (id) => {
+        const _self = this;
+        if (id == null || Array.isArray(id) || _self.indexs[id] == null) return null;
+        const pos = _self.indexs[id];
+        if (pos < _self.items.length) return _self.items[pos];
+        return null;
+    };
+    this.get_indexs = () => { return this.indexs; };
 
     this.index_update = function (o) {
         const _self = this;
@@ -338,10 +346,49 @@
         o['#org'] = o['#ids'] + ' ' + o['#utf8'];
 
         o.ix___ = _self.items.length;
-        _self.indexs[o.id] = o;
+        _self.indexs[o.id] = o.ix___;
 
         return o;
     };
+
+    this.update_cols_for_all = (obj, callback) => {
+        const _self = this;
+
+        if (obj == null || typeof obj != 'object' || Object.keys(obj).length == 0) callback({ ok: true });
+
+        for (var i = 0; i < _self.items.length; i++) 
+            for (var col in obj) _self.items[i][col] = obj[col];
+
+        _self.sync_redis(callback);
+    };
+
+    this.update_cols_by_id = (obj, callback) => {
+        const _self = this;
+        const config = _self.config;
+
+        if (client == null || _self.ready == false)
+            return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
+        
+        if (obj == null || typeof obj != 'object' || Object.keys(obj).length == 0)
+            return callback({ ok: true });
+
+        if (obj.id == null)
+            return callback({ ok: false, message: 'Cannot find item has id = ' + obj.id });
+
+        const it = _.find(_self.items, function (o_) { return o_.id = obj.id; });
+        if (it == null)
+            return callback({ ok: false, message: 'Cannot find item has id = ' + obj.id });
+        
+        for (var col in obj) if (col != 'id') it[col] = obj[col];
+
+        client.set(it.id, JSON.stringify(it), function (err) {
+            callback({ ok: true, data: it });
+        });
+    };
+
+
+
+
 
     this.addnew = function (obj, callback) {
         const _self = this;
@@ -430,6 +477,9 @@
             if (callback) callback({ ok: err == null && res == 1, id: key, message: err });
         });
     };
+
+
+
 
     this.valid_add = function (obj) {
         const _self = this;
