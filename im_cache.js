@@ -29,8 +29,8 @@
     this.ready = false;
     this.busy = false;
 
-    this.get_client = () => { return client; }
-    this.get_db_sync = () => { return db; }
+    this.get_client = () => { return client; };
+    this.get_db_sync = () => { return db; };
 
     this.___convert_unicode_to_ascii = function (str) {
         if (str == null || str.length == 0) return '';
@@ -708,5 +708,11 @@
         const _self = this;
         _self.items = [];
         _self.indexs = {};
+    };
+    this.destroy = function () {
+        const _self = this;
+        _self.ram_clear();
+        if (client) client.quit();
+        if (db) db.quit();
     };
 };

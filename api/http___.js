@@ -1,6 +1,13 @@
 ﻿function(api, req, res, config, body) {
     if (api == null || req == null || res == null) return null;
 
+    if (api.busy) {
+        let s = api.message;
+        if (s == null || s.length == 0) s = 'System cache is locked for improment, Please try again';
+        res.json({ ok: false, message: s, time: new Date().toLocaleString() });
+        return;
+    }
+
     let str_api, str_action;
     if (req.query && req.query.api && req.query.action) {
         str_api = req.query.api.toUpperCase();
@@ -8,8 +15,10 @@
     }
 
     if (str_api == null || str_api.length == 0 ||
-        str_action == null || str_action.length == 0)
-        return res.json({ ok: false, message: 'URI must be format is /?api=...&action=...', time: new Date().toLocaleString() });
+        str_action == null || str_action.length == 0) {
+        res.json({ ok: false, message: 'URI must be format is /?api=...&action=...', time: new Date().toLocaleString() });
+        return;
+    }
 
     let a = [];
     let k, v, pos = -1;

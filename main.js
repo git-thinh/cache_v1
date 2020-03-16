@@ -5,7 +5,7 @@ const URL = require('url');
 
 const ___SCOPE = 'MAIN';
 const ___CLEAN_LOG = true;
-const API = { page_size: 15, config: null, busy: false, busy_func: {}, cache: {} };
+const API = { page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');
@@ -180,6 +180,23 @@ const app___start_callback = (ok) => {
     ___log_key(LOG_KEY, 'start success = ' + ok);
 };
 
+const app___cache_reset = (cache_name, callback) => {
+
+};
+const app___cache_reset_all = (callback) => {
+    API.busy = true;
+    API.message = 'All cache reseting';
+
+    for (var c in API.cache) API.cache[c].destroy();
+
+    im_config.get().then(cfs => {
+        API.config = cfs;
+        console.log('Load config done ...');
+        ___log_key(LOG_KEY, 'load config', cfs);
+        resolve({ ok: true, data: cfs });
+    });
+};
+
 //#endregion
 
 //#region [ READLINE ]
@@ -207,8 +224,9 @@ RL.on("line", function (line) {
                 '- config = Display config',
 
                 '- api.key = Display keys of object API',
-                '- reload (|file_api.js) = Reload all script | reload only a file_api.js',
+                '- api.reload (|file_api.js) = Reload all script | reload only a file_api.js',
 
+                '- cache.reload = Reset cache engine (all | by cache_name)',
                 '- cache.key = Display keys of Cache Engine',
                 '- cache.load_db KEY = Load DB into cache engin by KEY',
                 '- cache.load_redis = Load Redis into cache engin by KEY',
@@ -233,7 +251,7 @@ RL.on("line", function (line) {
             else
                 console.log(_.sortBy(Object.keys(API)));
             break;
-        case 'reload':
+        case 'api.reload':
             console.clear();
             if (a.length > 1) {
                 const file = a[1].toLowerCase();
@@ -243,6 +261,20 @@ RL.on("line", function (line) {
             } else {
                 api___reset_all(() => {
                     console.log('RESET ALL API done ...');
+                });
+            }
+            break;
+        case 'cache.reload':
+            console.clear();
+            if (a.length > 1) {
+                const cache_name = a[1].trim().toUpperCase();
+                app___cache_reset(cache_name, () => {
+                    console.log('Cache ' + cache_name + ' reset -> done ...');
+                });
+            } else {
+                app___cache_reset_all(() => {
+                    console.log('All Cache reset -> done ...');
+                    console.log(Object.keys(API.cache));
                 });
             }
             break;
@@ -290,7 +322,7 @@ RL.on("line", function (line) {
                 console.log(r1);
                 if (r1.ok) {
                     API.cache['USER'].sync_redis(r2 => {
-                        console.log(r2); 
+                        console.log(r2);
                     });
                 }
             });
