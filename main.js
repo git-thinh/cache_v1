@@ -9,7 +9,7 @@ const API = { page_size: 15, config: null, busy: false, message: '', busy_func: 
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');
-const HTTP_PORT = 123;
+const HTTP_PORT = 12369;
 
 //#region [ LOG ]
 

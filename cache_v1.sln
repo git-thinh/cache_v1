@@ -66,6 +66,27 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "corenode", "C:\corenode\", 
 		SlnRelativePath = "C:\corenode\"
 	EndProjectSection
 EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "pol_v1", "..\pol_v1\", "{F067699D-1BC5-4BDE-A5AA-143EE2068088}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_55413"
+		Debug.AspNetCompiler.PhysicalPath = "..\pol_v1\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_55413\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_55413"
+		Release.AspNetCompiler.PhysicalPath = "..\pol_v1\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_55413\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "55413"
+		SlnRelativePath = "..\pol_v1\"
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -77,6 +98,8 @@ Global
 		{7259F2C6-FB4A-4174-82CD-DF49F194B9DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F08D23A-331A-473B-97A6-4375CE27C45C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7F08D23A-331A-473B-97A6-4375CE27C45C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F067699D-1BC5-4BDE-A5AA-143EE2068088}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F067699D-1BC5-4BDE-A5AA-143EE2068088}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
