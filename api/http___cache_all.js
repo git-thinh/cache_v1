@@ -12,7 +12,7 @@
     
     let m = { ok: false, code: '', message: '', request: config, data: [] };    
     try {
-        m = api.cache[api_name].get_all(config.fn_map);
+        m = api.cache[api_name].search_by_config(config);
         m.request = config;
     } catch (e1) {
         m.code = 'ERR_CALL_GET_ALL';

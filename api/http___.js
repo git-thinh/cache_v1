@@ -64,6 +64,7 @@
     if (query && query.fn_map) str_map = query.fn_map;
     if (str_map == null || str_map.length == 0) str_map = null;
     if (body && body.fn_map) str_map = body.fn_map;
+    //console.log('str_map === ', str_map);    
 
     if (str_map) {
         try {

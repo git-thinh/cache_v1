@@ -229,40 +229,43 @@
         else page_number = 1;
 
         let fn_map, fn_conditions;
-        if (cf && typeof cf.fn_map != 'function') fn_map = cf.fn_map;
-        if (cf && typeof cf.fn_conditions != 'function') fn_conditions = cf.fn_conditions;
+        if (cf && typeof cf.fn_map == 'function') fn_map = cf.fn_map;
+        if (cf && typeof cf.fn_conditions == 'function') fn_conditions = cf.fn_conditions;
 
         const total = _self.items.length;
         const ids = [], items = [];
         const no_filter = fn_conditions == null;
+        const no_map = fn_map == null;
 
         let min = 0, max = page_size;
         if (page_number > 1) {
-            min = (page_number - 1) * page_size;
+            min = (page_number - 1) * page_size + 1;
             max = page_number * page_size;
         }
+
+        //console.log(page_number, min, max, no_map);
 
         for (var i = 0; i < total; i++) {
             let o = _self.items[i];
             try {
                 if (no_filter) {
                     ids.push(o.id);
-                    if (ids.length >= min && ids.length < max) {
-                        if (fn_map) items.push(fn_map(o));
-                        else items.push(o);
+                    if (ids.length >= min && ids.length <= max) {
+                        if (no_map) items.push(o);
+                        else items.push(fn_map(o));
                     }
                 } else if (fn_conditions(o)) {
                     ids.push(o.id);
-                    if (ids.length >= min && ids.length < max) {
-                        if (fn_map) items.push(fn_map(o));
-                        else items.push(o);
+                    if (ids.length >= min && ids.length <= max) {
+                        if (no_map) items.push(o);
+                        else items.push(fn_map(o));
                     }
                 }
             } catch (e1) {
                 return { ok: false, code: 'ERR_THROW.SEARCH_BY_CONFIG', message: e1.message, err: e1 };
             }
         }
-        return { ok: true, total: total, page_size: page_size, ids: ids, data: items };
+        return { ok: true, total: total, ids: ids, data: items };
     };
     this.get_by_ids = (ids, fn_map) => {
         const _self = this;
@@ -270,18 +273,6 @@
         let a = [];
         try {
             a = _.map(ids, function (o_) { return fn_map == null ? _self.indexs[o_] : fn_map(_self.indexs[o_]); });
-        } catch (e1) {
-            return { ok: false, message: e1.message, err: e1, data: [] }
-        }
-        return { ok: true, data: a };
-    };
-    this.get_all = (fn_map) => {
-        const _self = this;
-        if (fn_map == null) return { ok: true, data: _self.items };
-
-        let a = [];
-        try {
-            a = _.map(_self.items, fn_map);
         } catch (e1) {
             return { ok: false, message: e1.message, err: e1, data: [] }
         }
