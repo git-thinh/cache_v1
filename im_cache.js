@@ -351,15 +351,45 @@
         return o;
     };
 
-    this.update_cols_for_all = (obj, callback) => {
+    this.update_object_for_all = (obj, callback) => {
         const _self = this;
 
         if (obj == null || typeof obj != 'object' || Object.keys(obj).length == 0) callback({ ok: true });
 
-        for (var i = 0; i < _self.items.length; i++)
+        const ms = [], ids = [];
+        for (var i = 0; i < _self.items.length; i++) {
             for (var col in obj) _self.items[i][col] = obj[col];
+            ids.push(_self.items[i].id);
+            ms.push(['set', _self.items[i].id, JSON.stringify(_self.items[i])]);
+        }
 
-        _self.sync_redis(callback);
+        client.multi(ms).exec(function (err, replies) {
+            callback({ ok: err == null, message: err == null ? '' : err.message, replies: replies, ids: ids, err: err });
+        });
+
+        //_self.sync_redis(callback);
+    };
+    this.update_array_objects_by_id = (objs, callback) => {
+        const _self = this;
+
+        if (objs == null || Array.isArray(objs) == false) callback({ ok: false, message: 'Input must be a array objects' });
+        
+        const ms = [], ids = [],not_finds = [];
+        for (var i = 0; i < objs.length; i++) {
+            if (objs[i].id) {
+                let it = _.find(_self.items, function (o_) { return o_.id == objs[i].id; });
+                if (it) {
+                    for (var col in objs[i]) it[col] = objs[i][col];
+                    ids.push(it.id);
+                    ms.push(['set', it.id, JSON.stringify(it)]);
+                } else not_finds.push(objs[i].id);
+            }
+        }
+
+        client.multi(ms).exec(function (err, replies) {
+            callback({ ok: err == null, message: err == null ? '' : err.message, not_finds: not_finds, replies: replies, ids: ids, err: err });
+        });
+        //_self.sync_redis(callback);
     };
 
     this.update_cols_by_id = (obj, callback) => {

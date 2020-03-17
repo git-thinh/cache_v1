@@ -1,15 +1,21 @@
-﻿const { inspect } = require('util');
+﻿
+let IO_PORT = 3500;
+let API_PORT = 12369;
+
+const { inspect } = require('util');
 const FS = require('fs');
 const _ = require('lodash');
 const URL = require('url');
 
+const FETCH = require('node-fetch');
+process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
+
 const ___SCOPE = 'MAIN';
 const ___CLEAN_LOG = true;
-const API = { _: _, fs: FS, page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
+const API = { _: _, fs: FS, IO_PORT: IO_PORT, FETCH: FETCH, page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
 
 const im_config = require('./im_config.js');
 const im_http = require('./im_http.js');
-const HTTP_PORT = 12369;
 
 //#region [ LOG ]
 
@@ -176,9 +182,9 @@ const app___start = () => {
 
     const p3 = new Promise(function (resolve, reject) {
         im_http.API = API;
-        im_http.start({ port: HTTP_PORT }, () => {
-            console.log('\n----> HTTP ' + HTTP_PORT + ' ready...');
-            ___log_key(LOG_KEY, 'start HTTP_PORT = ' + HTTP_PORT);
+        im_http.start({ port: API_PORT }, () => {
+            console.log('\n----> HTTP ' + API_PORT + ' ready...');
+            ___log_key(LOG_KEY, 'start API_PORT = ' + API_PORT);
             resolve({ ok: true });
         });
     });
@@ -291,7 +297,7 @@ RL.on("line", function (line) {
             break;
         case 'info':
             console.clear();
-            console.log('CACHE HTTP_PORT = ' + HTTP_PORT);
+            console.log('CACHE API_PORT = ' + API_PORT);
             break;
         case 'config':
             console.clear();

@@ -12,33 +12,39 @@
         return;
     }
 
+    const FETCH = api.FETCH;
+    const IO_PORT = api.IO_PORT;
+
+    const _ = api._;
     const ___cache = api.cache;
     const _self = ___cache[api_name];
 
-    config.fn_conditions = function (o) { return o.id == body.user_id; }
-
-    let m = { Ok: false, code: '', message: '', request: config, data: [] };
+    let m = { ok: false, code: '', message: '', request: config };
     try {
-        const rs = _self.search_by_config(config);
-        if (rs.ok && rs.data.length > 0) {
-            const user = rs.data[0];
-            user.int_pol_status = body.int_pol_status;
+        const index = _.findIndex(_self.items, function (o_) { return o_.id == body.user_id; });
+        if (index != -1) {
+            _self.items[index].int_pol_status = body.int_pol_status;
 
-            api.___log_key('LOGIN_DEV_OK', user);
+            m = api['user_int_don___list'](api, req, res, config, body);
+            m.command = 'BROAD_CAST_USER_TLS';
 
-            m.data = user;
-            m.Ok = true;
-        } else {
-            m.message = 'Đăng nhập không thành công';
+            FETCH('http://127.0.0.1:' + IO_PORT + '/api-v1/push-notify', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(m)
+            }).then(res1 => res1.json()).then(m1 => {
+                api.___log_key('BROAD_CAST_USER_TLS', m);
+                m.ok = m1.ok;
+                res.json(m);
+            }).catch(e1 => {
+                m.message = e1.message;
+                m.err = e1;
+                res.json(m);
+            });
         }
-        m.request = config;
-    } catch (e1) {
-        m.message = e1.message;
+    } catch (e) {
+        m.message = e.message;
+        api.___log_key(LOG_KEY, m);
+        res.json(m);
     }
-    return res.json(m);
-
-    //res.json({ ok: true, time: new Date().toLocaleString() });
-    //res.json({ data: Object.keys(api.cache) });
-    //res.json(api.cache[api_name].items);
-    //res.json(api.cache[api_name].get_config());
 }
