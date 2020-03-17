@@ -356,7 +356,7 @@
 
         if (obj == null || typeof obj != 'object' || Object.keys(obj).length == 0) callback({ ok: true });
 
-        for (var i = 0; i < _self.items.length; i++) 
+        for (var i = 0; i < _self.items.length; i++)
             for (var col in obj) _self.items[i][col] = obj[col];
 
         _self.sync_redis(callback);
@@ -368,7 +368,7 @@
 
         if (client == null || _self.ready == false)
             return callback({ ok: false, message: 'Cache engine disconect: ' + JSON.stringify(config) });
-        
+
         if (obj == null || typeof obj != 'object' || Object.keys(obj).length == 0)
             return callback({ ok: true });
 
@@ -378,7 +378,7 @@
         const it = _.find(_self.items, function (o_) { return o_.id = obj.id; });
         if (it == null)
             return callback({ ok: false, message: 'Cannot find item has id = ' + obj.id });
-        
+
         for (var col in obj) if (col != 'id') it[col] = obj[col];
 
         client.set(it.id, JSON.stringify(it), function (err) {
@@ -789,4 +789,391 @@
             console.log('err_destroy', e);
         }
     };
+
+
+    //#region [ HOOK CACHE ]
+
+    const ___notify_write = function (db_action, cache_name, o) { };
+
+    const f_____update_cache_memory___execute = (obj, socket, callback) => {
+        try {
+            const ___cache = api.cache;
+
+            let k = 0, i = 0;
+            let sync_ok = false;
+
+            let id;
+            const ids = [];
+            let api_name = obj.a;
+            let cache_name = api_name ? api_name.toLocaleUpperCase() : '';
+
+            if (!___cache.hasOwnProperty(cache_name)) {
+                if (callback) callback({ ok: false, code: 'NOT_EXIST', data: obj, message: 'Cache not exist ' + cache_name });
+                return;
+            }
+
+            const data = obj.d ? obj.d : [];
+            const key = obj.c;
+            ////const token = obj.t;
+            ////const user_id = obj.ui;
+            ////const user_command = obj.uc;
+            ////const user_para = obj.up;
+
+            const master_table = obj.mt;
+            const master_id = obj.mi;
+            const col_update = obj.v;
+
+            switch (key) {
+                case 'DB_INSERT':
+
+                    //for (i = 0; i < data.length; i++) {
+                    //    k = _.findIndex(___cache[cache_name], function (o) { return o.id == data[i].id; });
+                    //    if (k == -1) {
+                    //        data[i].index___ = ___cache[cache_name].length;
+
+                    //        data[i] = ___row_changed_update_cache(cache_name, data[i]);
+
+                    //        ___cache[cache_name].push(data[i]);
+                    //        ___index[cache_name][data[i].id] = ___cache[cache_name].length - 1;
+
+                    //        ids.push(data[i].id);
+                    //        sync_ok = true;
+                    //    }
+                    //}
+
+                    //if (master_table && master_id) {
+                    //    ___row_changed_update_cache(master_table, master_id);
+                    //}
+
+                    break;
+                case 'DB_UPDATE':
+
+                    //for (i = 0; i < data.length; i++) {
+                    //    k = _.findIndex(___cache[cache_name], function (o) { return o.id == data[i].id; });
+                    //    if (k != -1) {
+                    //        data[i] = ___row_changed_update_cache(cache_name, data[i]);
+                    //        ___cache[cache_name][k] = data[i];
+                    //        ids.push(data[i].id);
+                    //        sync_ok = true;
+                    //    }
+                    //}
+
+                    //if (master_table && master_id) {
+                    //    ___row_changed_update_cache(master_table, master_id);
+                    //}
+
+                    break;
+                case 'DB_UPDATE_V':
+                    //if (col_update) {
+                    //    for (i = 0; i < data.length; i++) {
+                    //        k = _.findIndex(___cache[cache_name], function (o) { return o.id == data[i].id; });
+                    //        if (k != -1) {
+                    //            ___cache[cache_name][k][col_update] = data[i]['v'];
+                    //            if (col_update == 'caller_online_id')
+                    //                ___cache[cache_name][k].int_queued = -1;
+
+                    //            ids.push(data[i].id);
+
+                    //            sync_ok = true;
+                    //        }
+                    //    }
+                    //}
+                    break;
+                case 'DB_UPDATE_KEYS':
+                    for (i = 0; i < data.length; i++) {
+                        k = _.findIndex(___cache[cache_name], function (o) { return o.id == data[i].id; });
+                        if (k != -1) {
+                            for (var col_ in data[i])
+                                if (col_ != 'id') ___cache[cache_name][k][col_] = data[i][col_];
+                            ids.push(data[i].id);
+                            sync_ok = true;
+                        }
+                    }
+                    break;
+                default:
+                    //if (key.startsWith('CACHE_ALL_POL_')) {
+                    //    cache_name = key.substr('CACHE_ALL_'.length);
+                    //    if (___cache[cache_name]) {
+                    //        ___cache[cache_name] = [];
+                    //        cache___initFromDB(cache_name.toLowerCase() + '.sql');
+                    //    }
+                    //    if (socket) socket.destroy();
+                    //}
+                    break;
+            }
+
+            if (sync_ok) {
+                if (data && data.length > 0) ___notify_write(key, cache_name, data[0]);
+            }
+
+            const m_ = { ok: sync_ok, ids: ids, api: cache_name, action: key, data: obj };
+            if (callback) callback(m_);
+            //_im_sync_v1.write(m_);
+
+            //console.log('', cache_name, sync_ok, obj);
+        } catch (e) {
+            const m_ = { ok: false, code: 'ERR_THROW', data: obj, message: e.message, err: e };
+            if (callback) callback(m_);
+            //_im_sync_v1.write(m_);
+        }
+    };
+
+    function http___hook_cache(api, req, res, config, body, type_) {
+        if (api == null || req == null || res == null) return null;
+
+        let str_api, str_action;
+        if (req.query && req.query.api && req.query.action) {
+            str_api = req.query.api.toUpperCase();
+            str_action = req.query.action.toLowerCase();
+        }
+        if (body && body.action___) str_action = body.action___.toLowerCase();
+        if (body && body.api___) str_api = body.api___.toUpperCase();
+        str_action = type_;
+
+        if (str_api == null || str_api.length == 0 ||
+            str_action == null || str_action.length == 0) {
+            res.json({ ok: false, code: 'HTTP___', message: 'URI must be format is {api___:..., action___:...} Or /?api=...&action=...' });
+            return;
+        }
+
+        if (api.cache && api.cache[str_api] == null) {
+            res.json({ ok: false, code: 'HTTP___', message: 'Cache engine not exist ' + str_api });
+            return;
+        }
+
+        let a = [];
+        let k, v, pos = -1;
+
+        const query = {};
+        //#region [ PATH, QUERY ]
+
+        let path = req.originalUrl;
+        if (path.startsWith('/?')) path = path.substr(2);
+        path = path.split('&&').join('^^');
+
+        a = path.split('&');
+        for (var i = 0; i < a.length; i++) {
+            pos = a[i].indexOf('=');
+            if (pos > 0) {
+                k = a[i].substr(0, pos);
+                v = a[i].substr(pos + 1, a[i].length - pos - 1);
+                v = v.split('^^').join('&&');
+                v = decodeURIComponent(v);
+                query[k] = v;
+            }
+        }
+
+        //#endregion
+
+        let fn_conditions;
+        //#region [ FN_CONDITIONS ]
+
+        let str_conditions;
+        if (query && query.fn_conditions) conditions = query.fn_conditions;
+        if (str_conditions == null || conditions.length == 0) str_conditions = null;
+        if (body && body.fn_conditions) str_conditions = body.fn_conditions;
+
+        if (str_conditions) {
+            try {
+                fn_conditions = new Function('o', str_conditions);
+                fn_conditions(null);
+                fn_conditions({});
+            } catch (e1) {
+                fn_conditions = null;
+                res.json({ ok: false, code: 'HTTP___.ERR_CREATE_FN_CONDITIONS', message: e1.message, err: e1 });
+                return;
+            }
+        }
+
+        //#endregion
+
+        let fn_map;
+        //#region [ FN_MAP ]
+
+        let str_map;
+        if (query && query.fn_map) str_map = query.fn_map;
+        if (str_map == null || str_map.length == 0) str_map = null;
+        if (body && body.fn_map) str_map = body.fn_map;
+        //console.log('str_map === ', str_map);    
+
+        if (str_map) {
+            try {
+                fn_map = new Function('o', str_map);
+                fn_map(null);
+                fn_map({});
+            } catch (e1) {
+                fn_map = null;
+                res.json({ ok: false, code: 'HTTP___.ERR_CREATE_FN_MAP', message: e1.message, err: e1 });
+                return;
+            }
+        }
+
+        //#endregion
+
+        let page_number = 1;
+        //#region [ page_number ]
+
+        let v_page_number;
+        if (query && query.page_number) v_page_number = query.page_number;
+        if (v_page_number == null || v_page_number.length == 0) v_page_number = null;
+        if (body && body.page_number) v_page_number = body.page_number;
+
+        if (v_page_number) {
+            v_page_number = v_page_number.toString().trim().split('.')[0].trim();
+            if (v_page_number.length > 0) {
+                const n_page_number = Number(v_page_number);
+                if (isNaN(n_page_number) || n_page_number < 1) {
+                    res.json({ ok: false, code: 'HTTP___.ERR_CONFIG_PAGE_NUMBER', message: 'Config page_number must be > 0' });
+                    return;
+                } else {
+                    page_number = n_page_number;
+                }
+            }
+        }
+
+        //#endregion
+
+        let page_size = api.page_size == null ? 0 : api.page_size;
+        //console.log('api.page_size === ', api.page_size);
+        //#region [ page_size ]
+
+        let v_page_size;
+        if (query && query.page_size) v_page_size = query.page_size;
+        if (v_page_size == null || v_page_size.length == 0) v_page_size = null;
+        if (body && body.page_size) v_page_size = body.page_size;
+        //console.log('v_page_size === ', v_page_size);
+
+        if (v_page_size) {
+            v_page_size = v_page_size.toString().trim().split('.')[0].trim();
+            if (v_page_size.length > 0) {
+                const n_page_size = Number(v_page_size);
+                if (isNaN(n_page_size) || n_page_size < 1) {
+                    res.json({ ok: false, code: 'HTTP___.ERR_CONFIG_PAGE_NUMBER', message: 'Config page_size must be > 0' });
+                    return;
+                } else if (n_page_size > 0) {
+                    //console.log('n_page_size === ', n_page_size);
+                    page_size = n_page_size;
+                }
+            }
+        }
+
+        //#endregion
+
+        const config_ = {
+            cache: str_api,
+            action: str_action,
+            path: path,
+            query: query,
+            page_number: page_number,
+            page_size: page_size,
+            body: body,
+            fn_map: fn_map,
+            fn_conditions: fn_conditions
+        };
+
+        if (str_action == 'search')
+            http___hook_cache___search(api, req, res, config_, body);
+        else if (str_action == 'update')
+            http___hook_cache___update(api, req, res, config_, body);
+        else {
+            res.json({ ok: false, message: 'Value of action___ | action = search|update' });
+        }
+    }
+
+    function http___hook_cache___update(api, req, res, config, body) {
+        f_____update_cache_memory___execute(body, null, (m1) => {
+            m1.request = config;
+            res.json(m1);
+        });
+    }
+
+    function http___hook_cache___search(api, req, res, cf, body) {
+
+        if (cf == null || cf.cache == null || ___cache[cf.cache] == null) {
+            res.json({ ok: false, code: 'CONFIG_CACHE_NAME', message: 'Cache name not exist ' + cf.cache });
+            return;
+        }
+        try {
+            const ___cache_items = ___cache[cf.cache];
+
+            let page_size;
+            if (cf.page_size) page_size = cf.page_size;
+            else page_size = 15;
+            if (page_size == null) page_size = 0;
+            if (page_size == 0) {
+                res.json({ ok: false, code: 'CONFIG_PAGE_SIZE', message: 'Please config page_size > 0' });
+                return;
+            }
+
+            let page_number;
+            if (cf.page_number) page_number = cf.page_number;
+            else page_number = 1;
+
+            let fn_map, fn_conditions;
+            if (cf && typeof cf.fn_map == 'function') fn_map = cf.fn_map;
+            if (cf && typeof cf.fn_conditions == 'function') fn_conditions = cf.fn_conditions;
+
+            const total = ___cache_items.length;
+            const ids = [], items = [];
+            const no_filter = fn_conditions == null;
+            const no_map = fn_map == null;
+
+            let min = 0, max = page_size;
+            if (page_number > 1) {
+                min = (page_number - 1) * page_size + 1;
+                max = page_number * page_size;
+            }
+
+            //console.log(page_number, min, max, no_map);
+
+            for (var i = 0; i < total; i++) {
+                let o = ___cache_items[i];
+                try {
+                    if (no_filter) {
+                        ids.push(o.id);
+                        if (ids.length >= min && ids.length <= max) {
+                            if (no_map) items.push(o);
+                            else items.push(fn_map(o));
+                        }
+                    } else if (fn_conditions(o)) {
+                        ids.push(o.id);
+                        if (ids.length >= min && ids.length <= max) {
+                            if (no_map) items.push(o);
+                            else items.push(fn_map(o));
+                        }
+                    }
+                } catch (e1) {
+                    res.json({ ok: false, code: 'ERR_THROW.SEARCH_BY_CONFIG', message: e1.message, err: e1 });
+                    return;
+                }
+            }
+
+            res.json({ ok: true, total: total, count: ids.length, data: items, ids: ids });
+
+        } catch (e123) {
+            res.json({ ok: false, code: 'ERR_THROW_123.SEARCH_BY_CONFIG', message: e123.message, err: e123 });
+        }
+    }
+
+    ////_HTTP_APP.post('/api-v1/update', (req, res) => {
+    ////    const api = { cache: ___cache, _: _ };
+    ////    const config = {};
+    ////    const body = req.body;
+    ////    http___hook_cache(api, req, res, config, body, 'update');
+    ////});
+
+    ////_HTTP_APP.post('/api-v1/search', (req, res) => {
+    ////    const api = { cache: ___cache, _: _ };
+    ////    const config = {};
+    ////    const body = req.body;
+    ////    http___hook_cache(api, req, res, config, body, 'search');
+    ////});
+
+    ////_HTTP_APP.post('/api-v1/push-notify', (req, res) => {
+    ////    ___notify_write(null, null, req.body);
+    ////    res.json({ ok: true });
+    ////});
+
+    //#endregion
+
 };
