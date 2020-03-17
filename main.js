@@ -267,6 +267,7 @@ RL.on("line", function (line) {
                 '- ?log = push to redis log at port 11111 on key MAIN.???  \n\n',
 
                 '- cls|clear|clean = Clean terminal console.log \n\n',
+                '- info = Info of cache engine',
 
                 '- config = Display all config \n\n',
 
@@ -287,6 +288,10 @@ RL.on("line", function (line) {
         case 'cls':
         case 'clear':
             console.clear();
+            break;
+        case 'info':
+            console.clear();
+            console.log('CACHE HTTP_PORT = ' + HTTP_PORT);
             break;
         case 'config':
             console.clear();

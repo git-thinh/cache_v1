@@ -40,8 +40,8 @@ c:\pos_sys_config_10019\redis-server.exe --service-install --service-name pos_sy
 .\redis-server.exe --service-install --service-name pol_log --port 10000
 sc delete pol_log
 
-npm install node-fetch cron uuid node-fetch express body-parser csv-stringify lodash tedious redis socket.io performance-now response-time kue -S
-
+npm install mssql node-fetch cron uuid node-fetch express body-parser csv-stringify lodash tedious redis socket.io performance-now response-time kue -S
+npm install cookie-parser grpc redis level grpc @grpc/proto-loader socket.io -S
 
 
 

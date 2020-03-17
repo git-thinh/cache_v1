@@ -1,8 +1,8 @@
 {
   "": "RESET_FROM_DB | LOAD_FROM_REDIS",
   "LOG": "",
-  "USER": "LOAD_FROM_REDIS",
-  "SYS_CONFIG": "LOAD_FROM_REDIS",
+  "USER": "",
+  "SYS_CONFIG": "",
   "SHOP": "",
   "GROUP": "",
   "SYS_SMS": "",

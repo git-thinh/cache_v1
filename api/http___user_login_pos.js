@@ -12,11 +12,15 @@
         return;
     }
 
+    // POS check user via api: 
+
+
+
+    // POL cache check user
     const ___cache = api.cache;
     const _self = ___cache[api_name];
 
     config.fn_conditions = function (o) { return o.str_user_name == body.str_user_name; }
-
     let m = { ok: false, code: '', message: '', request: config, data: [] };
     try {
         const rs = _self.search_by_config(config);
@@ -31,8 +35,8 @@
             user_.ref_id = user_.id;
             user_.scope_ids = 'pol';
 
-
             let user = JSON.parse(JSON.stringify(user_));
+            user.ok = true;
             delete user['str_password'];
 
             let cf = {}, acf = (___cache['SYS_CONFIG'] == null ? [] : ___cache['SYS_CONFIG'].items);
@@ -82,7 +86,8 @@
     } catch (e1) {
         m.message = e1.message;
     }
-    return res.json(m);
+
+    res.json(m);
 
     //res.json({ ok: true, time: new Date().toLocaleString() });
     //res.json({ data: Object.keys(api.cache) });
