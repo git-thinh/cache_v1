@@ -23,6 +23,8 @@
         if (rs.ok && rs.data.length > 0) {
             const user_ = rs.data[0];
             user_.int_pol_status = 1; // 0: offline; 1: online
+
+
             user_.str_token = user_.id + '12345xxxxxx4xxxxyxxxxxxxxxxxxxxxxxxxxxxxxxxx4xxxxyxxxxxxxxxxxxxxxxxxxxxxxxxxx4xxxxyxxxxxxxxxxxxxxxxxxxxxxxxxxx4xxxxyxxxxxxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
@@ -30,7 +32,8 @@
             user_.user_id = user_.id;
             user_.ref_id = user_.id;
             user_.scope_ids = 'pol';
-                       
+
+            
             let user = JSON.parse(JSON.stringify(user_));
             user.ok = true;
             delete user['str_password'];

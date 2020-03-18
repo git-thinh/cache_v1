@@ -8,7 +8,7 @@
     api.___log_key(LOG_KEY, config);
 
     if (body == null || body.int_pol_status == null || body.user_id == null) {
-        res.json({ ok: false, message: 'Data format must be: { user_id:..., int_pol_status:...}' });
+        res.json({ ok: false, message: 'Data format must be: { user_id:..., int_pol_status:..., int_user_create:...}' });
         return;
     }
 
