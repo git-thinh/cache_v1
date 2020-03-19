@@ -57,8 +57,8 @@
             this.btnEditorSearch = new System.Windows.Forms.Button();
             this.txtEditorSearch = new System.Windows.Forms.TextBox();
             this.btnLogItemSaveFile = new System.Windows.Forms.Button();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
+            this.lblKeySelected_Time = new System.Windows.Forms.Label();
+            this.lblKeySelected_Path = new System.Windows.Forms.Label();
             this.panelHeader.SuspendLayout();
             this.panelLeft.SuspendLayout();
             this.panelList.SuspendLayout();
@@ -92,7 +92,7 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lblMessage.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblMessage.ForeColor = System.Drawing.SystemColors.Info;
+            this.lblMessage.ForeColor = System.Drawing.Color.OrangeRed;
             this.lblMessage.Location = new System.Drawing.Point(384, 4);
             this.lblMessage.Name = "lblMessage";
             this.lblMessage.Size = new System.Drawing.Size(527, 30);
@@ -317,8 +317,8 @@
             this.panel1.Controls.Add(this.btnEditorSearch);
             this.panel1.Controls.Add(this.txtEditorSearch);
             this.panel1.Controls.Add(this.btnLogItemSaveFile);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.lblKeySelected_Time);
+            this.panel1.Controls.Add(this.lblKeySelected_Path);
             this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
@@ -393,29 +393,29 @@
             this.btnLogItemSaveFile.UseVisualStyleBackColor = false;
             this.btnLogItemSaveFile.Click += new System.EventHandler(this.btnLogItemSaveFile_Click);
             // 
-            // label2
+            // lblKeySelected_Time
             // 
-            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label2.Location = new System.Drawing.Point(391, 5);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(174, 13);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "19 - 03 - 2020 08:09:35 - 169";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.TopRight;
+            this.lblKeySelected_Time.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblKeySelected_Time.AutoSize = true;
+            this.lblKeySelected_Time.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKeySelected_Time.ForeColor = System.Drawing.SystemColors.ActiveCaption;
+            this.lblKeySelected_Time.Location = new System.Drawing.Point(391, 5);
+            this.lblKeySelected_Time.Name = "lblKeySelected_Time";
+            this.lblKeySelected_Time.Size = new System.Drawing.Size(174, 13);
+            this.lblKeySelected_Time.TabIndex = 1;
+            this.lblKeySelected_Time.Text = "19 - 03 - 2020 08:09:35 - 169";
+            this.lblKeySelected_Time.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
-            // label1
+            // lblKeySelected_Path
             // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.ForeColor = System.Drawing.SystemColors.ActiveCaption;
-            this.label1.Location = new System.Drawing.Point(3, 4);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(270, 13);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "/ MAIN / USER_ON_OFF / 200319131441132";
+            this.lblKeySelected_Path.AutoSize = true;
+            this.lblKeySelected_Path.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblKeySelected_Path.ForeColor = System.Drawing.SystemColors.ActiveCaption;
+            this.lblKeySelected_Path.Location = new System.Drawing.Point(3, 4);
+            this.lblKeySelected_Path.Name = "lblKeySelected_Path";
+            this.lblKeySelected_Path.Size = new System.Drawing.Size(270, 13);
+            this.lblKeySelected_Path.TabIndex = 0;
+            this.lblKeySelected_Path.Text = "/ MAIN / USER_ON_OFF / 200319131441132";
             // 
             // fMainUI
             // 
@@ -464,8 +464,8 @@
         private System.Windows.Forms.Panel panelEditor;
         private System.Windows.Forms.RichTextBox txtEditor;
         private System.Windows.Forms.TreeView treeKeys;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblKeySelected_Time;
+        private System.Windows.Forms.Label lblKeySelected_Path;
         private System.Windows.Forms.Button btnLogItemSaveFile;
         private System.Windows.Forms.Splitter splitter2;
         private System.Windows.Forms.Panel panelList;

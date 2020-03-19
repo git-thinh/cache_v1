@@ -1,7 +1,7 @@
 ﻿function(api, req, res, config, body) {
     if (api == null || req == null || res == null || config == null) return null;
     const api_name = config.cache;
-    const LOG_KEY = api_name + '_' + config.action;
+    let LOG_KEY = api_name + '_' + config.action;
     if (api.cache[api_name] == null)
         return res.json({ ok: false, request: config, time: new Date().toLocaleString(), message: 'Cannot find cache ' + config.cache });
 
@@ -28,6 +28,8 @@
             m = api['user_int_don___list'](api, req, res, config, body);
             m.command = 'BROAD_CAST_USER_TLS';
             m.request = config;
+
+            api.___log_key(LOG_KEY + '.' + body.user_id, m);
 
             FETCH('http://127.0.0.1:' + IO_PORT + '/api-v1/push-notify', {
                 method: 'POST',

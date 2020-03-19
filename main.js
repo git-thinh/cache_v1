@@ -11,7 +11,7 @@ const FETCH = require('node-fetch');
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0;
 
 const ___SCOPE = 'MAIN';
-const ___CLEAN_LOG = true;
+const ___CLEAN_LOG = false;
 const API = { _: _, fs: FS, IO_PORT: IO_PORT, FETCH: FETCH, page_size: 15, config: null, busy: false, message: '', busy_func: {}, cache: {} };
 
 const im_config = require('./im_config.js');
