@@ -34,21 +34,38 @@ namespace ui_log_redis
 
         private void btnCleanLog_Click(object sender, EventArgs e)
         {
+            labelMessage.Text = string.Empty;
             try
             {
                 var r = new Redis(txtIP.Text.Trim(), Convert.ToInt16(txtPort.Text.Trim()));
                 r.FlushDb();
                 r.Dispose();
-                MessageBox.Show("Delete LOG success");
+                labelMessage.Text = "OK";
             }
             catch (Exception err) {
-                MessageBox.Show("Delete LOG fail");
+                labelMessage.Text = "FAIL";
             }
         }
 
         private void fMain_Load(object sender, EventArgs e)
         {
-            this.MouseDown += Form_MouseDown;
+            labelMessage.MouseDown += Form_MouseDown;
+            this.Shown += (s1, e1) => {
+                this.Width = 98;
+                this.Top = 45;
+                this.Left = 45;
+            };
+        }
+
+        private void btnExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void fMain_MouseClick(object sender, MouseEventArgs e)
+        {
+            this.TopMost = true;
+            labelMessage.Text = string.Empty;
         }
     }
 }
