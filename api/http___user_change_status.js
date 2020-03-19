@@ -27,6 +27,7 @@
 
             m = api['user_int_don___list'](api, req, res, config, body);
             m.command = 'BROAD_CAST_USER_TLS';
+            m.request = config;
 
             FETCH('http://127.0.0.1:' + IO_PORT + '/api-v1/push-notify', {
                 method: 'POST',
