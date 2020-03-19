@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null) return null;
 
     if (api.busy) {
@@ -176,8 +176,8 @@
     if (api[func] == null)
         return res.json({ ok: false, code: 'HTTP___', message: 'Cannot find API: ' + func + ', http___cache_' + str_action });
     try {
-        api[func](api, req, res, config_, body);
+        api[func](api, req, res, config_, body, null);
     } catch (err) {
-        return res.json({ ok: false, code: 'HTTP___', message: 'ERROR_EXECUTE_API: ' + err.message, time: new Date().toLocaleString() });
+        return res.json({ ok: false, code: 'HTTP___', message: 'ERROR_EXECUTE_API: ' + (err ? err.message : '') });
     }
 }

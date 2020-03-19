@@ -60,11 +60,11 @@ const api___init_file = (file) => {
                             fc = new Function('api', 'obj', js);
                             fc(API, null);
                         } else if (f.startsWith('http___')) {
-                            fc = new Function('api', 'req', 'res', 'config', 'body', js);
-                            fc(API, null, null, null, null);
+                            fc = new Function('api', 'req', 'res', 'config', 'body', 'callback', js);
+                            fc(API, null, null, null, null, null);
                         } else if (f.startsWith('api___')) {
-                            fc = new Function('api', 'req', 'res', 'config', 'body', js);
-                            fc(API, null, null, null, null);
+                            fc = new Function('api', 'req', 'res', 'config', 'body', 'callback', js);
+                            fc(API, null, null, null, null, null);
                             api_name = api_name.substr(6);
                         } else if (f.startsWith('valid___')) {
                             fc = new Function('api', 'col', 'obj', 'val', js);
@@ -213,7 +213,7 @@ const app___cache_reset = (cache_name, callback) => {
     for (var c in API.cache) if (c == cache_name) API.cache[c].destroy();
 
     im_config.get().then(cfs => {
-        const cf = _.find(cfs, function (o_) { return o_.name == cache_name; }); 
+        const cf = _.find(cfs, function (o_) { return o_.name == cache_name; });
         if (cf) {
             const pos = _.findIndex(API.config, function (o_) { return o_.name == cache_name; });
             if (pos != -1) {

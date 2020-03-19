@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null || config == null) 
         return { ok: false, message: 'api or req or res or config or body is null' };
 

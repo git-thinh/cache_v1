@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null || config == null) return null;
     const api_name = config.cache;
     const _self = api.cache[api_name];

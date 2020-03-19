@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null || config == null) return null;
     const api_name = config.cache;
     const LOG_KEY = api_name + '_' + config.action;
@@ -17,7 +17,7 @@
 
     let m = { ok: false, code: '', message: '', request: config, data: [] };
     try {
-        _self.update_cols_for_all({ int_don: 0 }, (r1) => {
+        _self.update_object_for_all({ int_don: 0 }, (r1) => {
             //console.log(r1);
             m = r1;
             m.request = config;

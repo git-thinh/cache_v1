@@ -211,6 +211,10 @@ namespace ui_log_redis
         void f_load()
         {
             f_message();
+
+            treeKeys.Nodes.Clear();
+            listKeys.Items.Clear();
+
             try
             {
                 m_redis = new RedisDataAccessProvider();
@@ -326,7 +330,13 @@ namespace ui_log_redis
 
         void f_clean_all()
         {
-
+            //string s = m_redis.ReadString(m_redis.SendCommand(RedisCommand.FLUSHDB));
+            string s = "";
+            m_redis.SendCommand(RedisCommand.FLUSHDB);
+            f_message(s);
+            treeKeys.Nodes.Clear();
+            listKeys.Items.Clear();
+            //f_load();
         }
 
         void f_export_file()

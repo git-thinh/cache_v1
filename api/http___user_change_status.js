@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null || config == null) return null;
     const api_name = config.cache;
     let LOG_KEY = api_name + '_' + config.action;
@@ -25,7 +25,7 @@
         if (index != -1) {
             _self.items[index].int_pol_status = body.int_pol_status;
 
-            m = api['user_int_don___list'](api, req, res, config, body);
+            m = api['user_int_don___list'](api, req, res, config, body, null);
             m.command = 'BROAD_CAST_USER_TLS';
             m.request = config;
 

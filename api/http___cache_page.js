@@ -1,4 +1,4 @@
-﻿function(api, req, res, config, body) {
+﻿function(api, req, res, config, body, callback) {
     if (api == null || req == null || res == null || config == null) return null;
     const LOG_KEY = config.cache + '.' + config.action;    
     const api_name = config.cache;

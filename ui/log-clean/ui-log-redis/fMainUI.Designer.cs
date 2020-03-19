@@ -307,7 +307,7 @@
             this.txtEditor.ReadOnly = true;
             this.txtEditor.Size = new System.Drawing.Size(810, 520);
             this.txtEditor.TabIndex = 1;
-            this.txtEditor.Text = resources.GetString("txtEditor.Text");
+            this.txtEditor.Text = "";
             // 
             // panel1
             // 
