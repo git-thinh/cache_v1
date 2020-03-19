@@ -303,15 +303,18 @@ namespace ui_log_redis
         void f_key_ids_selected(int index) {
             if (index >= 0 && m_key_ids.Length > 0 && m_key_selected != null)
             {
+                string id = m_key_ids[index];
+                lblKeySelected_Time.Text = id;
+                string data = "";
                 try
                 {
-                    string data = m_redis.ReadString(m_redis.SendCommand(RedisCommand.HGET, m_key_selected.key_full, m_key_ids[index]));
+                    data = m_redis.ReadString(m_redis.SendCommand(RedisCommand.HGET, m_key_selected.key_full, id));
                     var o = JsonConvert.DeserializeObject(data);
                     string json = JsonConvert.SerializeObject(o, Formatting.Indented);
                     txtEditor.Text = json;
                 }
                 catch (Exception e) { 
-                
+                    txtEditor.Text = data;                
                 }
             }
         }
