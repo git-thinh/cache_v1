@@ -37,10 +37,10 @@ namespace ui_log_redis
             labelMessage.Text = string.Empty;
             try
             {
-                var r = new Redis(txtIP.Text.Trim(), Convert.ToInt16(txtPort.Text.Trim()));
-                r.FlushDb();
-                r.Dispose();
-                labelMessage.Text = "OK";
+                //var r = new Redis(txtIP.Text.Trim(), Convert.ToInt16(txtPort.Text.Trim()));
+                //r.FlushDb();
+                //r.Dispose();
+                //labelMessage.Text = "OK";
             }
             catch (Exception err) {
                 labelMessage.Text = "FAIL";
