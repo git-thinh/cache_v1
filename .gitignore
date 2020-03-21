@@ -8,3 +8,6 @@
 /api/___main_20200311_10PM.js
 /ui/log-clean/ui-log-redis/bin/Debug/*.pdb
 /ui/log-clean/ui-log-redis/obj
+/svnode/test/*.pdb
+/svnode/svnode/bin
+/svnode/svnode/obj
