@@ -11,3 +11,4 @@
 /svnode/test/*.pdb
 /svnode/svnode/bin
 /svnode/svnode/obj
+/svnode/test/*.nlp
